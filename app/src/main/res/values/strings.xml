@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Takehome</string>
+    <string name="Loading...">Loading</string>
 </resources>

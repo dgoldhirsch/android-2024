@@ -9,8 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-
-private const val LOADING = "Loading..." // TODO string resource
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun ProductPage(viewModel: ProductPageViewModel) {
@@ -27,7 +26,7 @@ fun ProductPage(viewModel: ProductPageViewModel) {
 fun Products(products: List<Product>) {
     Column {
         if (products.isEmpty()) {
-            Text(LOADING)
+            Text(stringResource(R.string.Loading___))
         } else {
             LazyColumn {
                 items(products) {
