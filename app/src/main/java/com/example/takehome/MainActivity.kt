@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.example.takehome.ui.ProductsLayout
+import com.example.takehome.ui.ProductsViewModel
 import com.example.takehome.ui.theme.TakehomeTheme
 
 class MainActivity : ComponentActivity() {
-    private val viewModel: ProductPageViewModel by viewModels()
+    private val viewModel: ProductsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,7 +24,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    ProductPage(viewModel)
+                    ProductsLayout(viewModel)
                 }
             }
         }

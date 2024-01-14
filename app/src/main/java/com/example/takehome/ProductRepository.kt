@@ -8,7 +8,6 @@ class ProductRepository {
     private val productService = RetrofitInstance.productService
 
     val productFlow: Flow<NetworkResult<List<Product>>> = flow {
-        println(">>>>> FLOWING...")
         emit(
             makeApiCall { productService.getProducts() },
         )
@@ -20,12 +19,11 @@ class ProductRepository {
 
     private suspend fun <T> makeApiCall(apiCall: suspend () -> Response<T>): NetworkResult<T> {
         try {
+            println(">>>>> FETCH")
             val response = apiCall()
 
             return if (response.isSuccessful) {
-                response.body()?.let {
-                    NetworkResult.Success(it)
-                } ?: NetworkResult.Error(EmptyBodyException())
+                response.body()?.let { NetworkResult.Success(it) } ?: NetworkResult.Error(EmptyBodyException())
             } else {
                 return NetworkResult.Error(RetrofitNetworkException(response.code(), response.message()))
             }

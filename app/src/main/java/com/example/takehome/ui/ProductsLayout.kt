@@ -1,4 +1,4 @@
-package com.example.takehome
+package com.example.takehome.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
@@ -6,20 +6,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.res.stringResource
+import com.example.takehome.Product
+import com.example.takehome.R
+import com.example.takehome.roundToNearestHalf
 
 @Composable
-fun ProductPage(viewModel: ProductPageViewModel) {
-    val products by viewModel.products.observeAsState(emptyList())
-
-    LaunchedEffect(Unit) {
-        viewModel.fetchProducts()
-    }
-
-    Products(products)
+fun ProductsLayout(viewModel: ProductsViewModel) {
+    val productsUiState by viewModel.uiState.collectAsState()
+    Products(productsUiState.products)
 }
 
 @Composable

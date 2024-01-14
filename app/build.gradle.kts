@@ -72,6 +72,7 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata:1.5.3")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
     testCompileOnly("pl.pragmatists:JUnitParams:1.1.1")
 }
