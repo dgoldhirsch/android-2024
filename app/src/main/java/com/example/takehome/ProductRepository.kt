@@ -18,17 +18,16 @@ class ProductRepository {
         Exception("Retrofit Network Exception $code: $message")
 
     private suspend fun <T> makeApiCall(apiCall: suspend () -> Response<T>): NetworkResult<T> {
-        try {
-            println(">>>>> FETCH")
+        return try {
             val response = apiCall()
 
             return if (response.isSuccessful) {
                 response.body()?.let { NetworkResult.Success(it) } ?: NetworkResult.Error(EmptyBodyException())
             } else {
-                return NetworkResult.Error(RetrofitNetworkException(response.code(), response.message()))
+                NetworkResult.Error(RetrofitNetworkException(response.code(), response.message()))
             }
         } catch (e: Exception) {
-            return NetworkResult.Error(e)
+            NetworkResult.Error(e)
         }
     }
 }

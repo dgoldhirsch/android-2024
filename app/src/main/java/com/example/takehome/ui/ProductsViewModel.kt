@@ -1,11 +1,8 @@
 package com.example.takehome.ui
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.takehome.NetworkResult
-import com.example.takehome.Product
 import com.example.takehome.ProductRepository
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
@@ -20,10 +17,7 @@ import kotlinx.coroutines.launch
 class ProductsViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ProductsUiState())
     val uiState: StateFlow<ProductsUiState> = _uiState.asStateFlow()
-
     private val repository = ProductRepository()
-    private val _products = MutableLiveData<List<Product>>()
-    val products: LiveData<List<Product>> = _products
 
     init {
         load()
@@ -37,7 +31,6 @@ class ProductsViewModel : ViewModel() {
                     emit(NetworkResult.Error(it))
                 }
                 .collect { networkResult ->
-                    println(">>>>> COLLECTING...")
                     when (networkResult) {
                         is NetworkResult.Success -> _uiState.update { uiState.value.asSuccess(networkResult.data.toPersistentList()) }
                         is NetworkResult.Loading -> _uiState.update { uiState.value.asLoading() }
