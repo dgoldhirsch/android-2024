@@ -5,5 +5,5 @@ import retrofit2.http.GET
 
 interface ProductService {
     @GET("products.v1.json")
-    suspend fun getProducts(): Response<List<Product>>
+    suspend fun getProducts(): Response<List<Product.Bean>>
 }

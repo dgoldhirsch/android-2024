@@ -3,7 +3,9 @@ package com.example.takehome.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.takehome.NetworkResult
+import com.example.takehome.Product
 import com.example.takehome.ProductRepository
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,19 +22,19 @@ class ProductsViewModel : ViewModel() {
     private val repository = ProductRepository()
 
     init {
-        load()
+        loadProducts()
     }
 
-    private fun load() {
+    private fun loadProducts() {
         viewModelScope.launch {
-            repository.productFlow
+            repository.fetchNetworkResult
                 .flowOn(Dispatchers.IO)
                 .catch {
-                    emit(NetworkResult.Error(it))
+                    emit(NetworkResult.Error(it)) // Worry about second error coming from the fetcher?
                 }
                 .collect { networkResult ->
                     when (networkResult) {
-                        is NetworkResult.Success -> _uiState.update { uiState.value.asSuccess(networkResult.data.toPersistentList()) }
+                        is NetworkResult.Success -> _uiState.update { uiState.value.asSuccess(networkResult.data.mapToProducts()) }
                         is NetworkResult.Loading -> _uiState.update { uiState.value.asLoading() }
                         is NetworkResult.Error -> _uiState.update {
                             uiState.value.asError(
@@ -44,4 +46,8 @@ class ProductsViewModel : ViewModel() {
                 }
         }
     }
+
+    private fun List<Product.Bean>.mapToProducts(): ImmutableList<Product> = map {
+        it.asProduct()
+    }.toPersistentList()
 }

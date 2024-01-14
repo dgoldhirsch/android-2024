@@ -7,7 +7,7 @@ import retrofit2.Response
 class ProductRepository {
     private val productService = RetrofitInstance.productService
 
-    val productFlow: Flow<NetworkResult<List<Product>>> = flow {
+    val fetchNetworkResult: Flow<NetworkResult<List<Product.Bean>>> = flow {
         emit(
             makeApiCall { productService.getProducts() },
         )
