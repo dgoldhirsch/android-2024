@@ -74,5 +74,6 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
     testCompileOnly("pl.pragmatists:JUnitParams:1.1.1")
 }
