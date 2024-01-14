@@ -30,7 +30,7 @@ class ProductsViewModel : ViewModel() {
             repository.fetchNetworkResult
                 .flowOn(Dispatchers.IO)
                 .catch {
-                    emit(NetworkResult.Error(it)) // Worry about second error coming from the fetcher?
+                    emit(NetworkResult.Error(it))
                 }
                 .collect { networkResult ->
                     when (networkResult) {

@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,6 +33,7 @@ fun ProductsLayout(viewModel: ProductsViewModel) {
 }
 
 @Composable
+@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
 fun Empty() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -45,6 +47,7 @@ fun Empty() {
 }
 
 @Composable
+@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
 fun Error(message: String = stringResource(R.string.no_details)) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -58,6 +61,7 @@ fun Error(message: String = stringResource(R.string.no_details)) {
 }
 
 @Composable
+@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
 fun Loading(text: String = stringResource(R.string.loading)) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -81,23 +85,7 @@ fun Products(products: List<Product>) {
 }
 
 @Composable
-@Preview
-fun EmptyPreview() = Empty()
-
-@Composable
-@Preview
-fun ErrorPreview() {
-    Error("Kneecaps broke")
-}
-
-@Composable
-@Preview
-fun LoadingPreview() {
-    Loading()
-}
-
-@Composable
-@Preview
+@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
 fun ProductsPreview() {
     Products(
         listOf(
@@ -105,6 +93,12 @@ fun ProductsPreview() {
                 name = "MegaFlame Blow Torch",
                 tagline = "Once you've used this on them, they won't have much more to say to you or anyone else.",
                 rating = 4.5,
+                date = "1-13-2018",
+            ),
+            Product(
+                name = "Ronco Pocket Harpoon",
+                tagline = "Gets the job done as nothing else can.",
+                rating = 2.3,
                 date = "1-13-2018",
             ),
         ),
