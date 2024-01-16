@@ -4,3 +4,5 @@ A sample app using a reasonable tech stack containing the following elements:
 
 * Jetpack Compose
 * Simple, uni-directional architecture implemented with ViewModel and StateFlow
+* Flow-based repository
+* Coroutines
