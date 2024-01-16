@@ -1,6 +1,6 @@
 package com.example.prototype
 
-import com.example.prototype.repositories.ProductBean
+import com.example.prototype.repositories.product.ProductBean
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

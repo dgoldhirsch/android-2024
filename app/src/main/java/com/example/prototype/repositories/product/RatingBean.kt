@@ -1,4 +1,4 @@
-package com.example.prototype.repositories
+package com.example.prototype.repositories.product
 
 data class RatingBean(
     val rate: Double = 0.0, // guaranteed non-nullable through Gson

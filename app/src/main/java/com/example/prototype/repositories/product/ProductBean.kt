@@ -1,4 +1,4 @@
-package com.example.prototype.repositories
+package com.example.prototype.repositories.product
 
 import com.example.prototype.Product
 

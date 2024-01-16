@@ -2,11 +2,11 @@ package com.example.prototype.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.prototype.repositories.NetworkResult
 import com.example.prototype.Product
-import com.example.prototype.repositories.ProductBean
-import com.example.prototype.repositories.ProductRepository
+import com.example.prototype.repositories.NetworkResult
+import com.example.prototype.repositories.product.ProductRepository
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,9 +35,9 @@ class ProductsViewModel : ViewModel() {
                 }
                 .collect { networkResult ->
                     when (networkResult) {
-                        is NetworkResult.Success -> _uiState.update {
+                        is NetworkResult.Success<*> -> _uiState.update {
                             uiState.value.asSuccess(
-                                networkResult.data.map { it.parse() }.toPersistentList()
+                                networkResult.data as? ImmutableList<Product> ?: persistentListOf()
                             )
                         }
 

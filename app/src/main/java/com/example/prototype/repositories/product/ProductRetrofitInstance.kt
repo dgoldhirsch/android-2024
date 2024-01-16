@@ -1,9 +1,9 @@
-package com.example.prototype.repositories
+package com.example.prototype.repositories.product
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object RetrofitInstance {
+internal object ProductRetrofitInstance {
     private const val BASE_URL = "https://fakestoreapi.com/"
 
     private val retrofit: Retrofit by lazy {
@@ -13,5 +13,5 @@ object RetrofitInstance {
             .build()
     }
 
-    val productService: ProductService = retrofit.create(ProductService::class.java)
+    internal val productService: ProductService = retrofit.create(ProductService::class.java)
 }
