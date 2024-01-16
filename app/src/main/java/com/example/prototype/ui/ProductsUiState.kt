@@ -1,6 +1,6 @@
-package com.example.takehome.ui
+package com.example.prototype.ui
 
-import com.example.takehome.Product
+import com.example.prototype.Product
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 

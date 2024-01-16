@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.takehome"
+    namespace = "com.example.prototype"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.takehome"
+        applicationId = "com.example.prototype"
         minSdk = 24
         targetSdk = 33
         versionCode = 1

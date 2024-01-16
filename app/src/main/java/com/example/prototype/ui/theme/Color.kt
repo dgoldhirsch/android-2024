@@ -1,4 +1,4 @@
-package com.example.takehome.ui.theme
+package com.example.prototype.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

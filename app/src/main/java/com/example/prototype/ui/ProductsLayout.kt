@@ -1,4 +1,4 @@
-package com.example.takehome.ui
+package com.example.prototype.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,9 +16,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.takehome.Product
-import com.example.takehome.R
-import com.example.takehome.roundToNearestHalf
+import com.example.prototype.Product
+import com.example.prototype.R
+import com.example.prototype.roundToNearestHalf
 
 @Composable
 fun ProductsLayout(viewModel: ProductsViewModel) {
@@ -89,16 +89,16 @@ fun ProductsPreview() {
     Products(
         listOf(
             Product(
-                name = "MegaFlame Blow Torch",
-                tagline = "Once you've used this on them, they won't have much more to say to you or anyone else.",
+                title = "MegaFlame Blow Torch",
+                description = "Once you've used this on them, they won't have much more to say to you or anyone else.",
                 rating = 4.5,
-                date = "1-13-2018",
+                count = 123,
             ),
             Product(
-                name = "Ronco Pocket Harpoon",
-                tagline = "Gets the job done as nothing else can.",
+                title = "Ronco Pocket Harpoon",
+                description = "Gets the job done as nothing else can.",
                 rating = 2.3,
-                date = "1-13-2018",
+                count = 3,
             ),
         ),
     )
@@ -110,9 +110,14 @@ private fun Product(product: Product) {
         modifier = Modifier.padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(product.name)
-        Text(product.tagline)
-        Text(product.rating.roundToNearestHalf().toString())
-        Text(product.date)
+        Text(product.title)
+        Text(product.description)
+        Text(
+            stringResource(
+                id = R.string.rating,
+                product.rating.roundToNearestHalf(),
+                product.count
+            )
+        )
     }
 }

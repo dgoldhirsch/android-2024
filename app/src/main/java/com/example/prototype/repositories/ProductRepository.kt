@@ -1,4 +1,4 @@
-package com.example.takehome
+package com.example.prototype.repositories
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -7,7 +7,7 @@ import retrofit2.Response
 class ProductRepository {
     private val productService = RetrofitInstance.productService
 
-    val fetchNetworkResult: Flow<NetworkResult<List<Product.Bean>>> = flow {
+    val fetchNetworkResult: Flow<NetworkResult<List<ProductBean>>> = flow {
         emit(
             makeApiCall { productService.getProducts() },
         )
@@ -22,7 +22,9 @@ class ProductRepository {
             val response = apiCall()
 
             return if (response.isSuccessful) {
-                response.body()?.let { NetworkResult.Success(it) } ?: NetworkResult.Error(EmptyBodyException())
+                response.body()?.let { NetworkResult.Success(it) } ?: NetworkResult.Error(
+                    EmptyBodyException()
+                )
             } else {
                 NetworkResult.Error(RetrofitNetworkException(response.code(), response.message()))
             }

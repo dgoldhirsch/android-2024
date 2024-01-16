@@ -1,10 +1,11 @@
-package com.example.takehome.ui
+package com.example.prototype.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.takehome.NetworkResult
-import com.example.takehome.Product
-import com.example.takehome.ProductRepository
+import com.example.prototype.repositories.NetworkResult
+import com.example.prototype.Product
+import com.example.prototype.repositories.ProductBean
+import com.example.prototype.repositories.ProductRepository
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +35,12 @@ class ProductsViewModel : ViewModel() {
                 }
                 .collect { networkResult ->
                     when (networkResult) {
-                        is NetworkResult.Success -> _uiState.update { uiState.value.asSuccess(networkResult.data.mapToProducts()) }
+                        is NetworkResult.Success -> _uiState.update {
+                            uiState.value.asSuccess(
+                                networkResult.data.map { it.parse() }.toPersistentList()
+                            )
+                        }
+
                         is NetworkResult.Loading -> _uiState.update { uiState.value.asLoading() }
                         is NetworkResult.Error -> _uiState.update {
                             uiState.value.asError(
@@ -46,8 +52,4 @@ class ProductsViewModel : ViewModel() {
                 }
         }
     }
-
-    private fun List<Product.Bean>.mapToProducts(): ImmutableList<Product> = map {
-        it.asProduct()
-    }.toPersistentList()
 }

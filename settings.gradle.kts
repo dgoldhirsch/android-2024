@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Takehome"
+rootProject.name = "Prototype"
 include(":app")

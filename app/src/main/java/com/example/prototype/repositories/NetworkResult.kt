@@ -1,4 +1,4 @@
-package com.example.takehome
+package com.example.prototype.repositories
 
 sealed class NetworkResult<T> {
     class Loading<T> : NetworkResult<T>()
