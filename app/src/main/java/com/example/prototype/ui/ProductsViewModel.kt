@@ -24,7 +24,7 @@ class ProductsViewModel : ViewModel() {
 
     private fun loadProducts() {
         viewModelScope.launch {
-            repository.fetchNetworkResult
+            repository.fetchProductsResponse
                 .flowOn(Dispatchers.IO)
                 .catch {
                     emit(ProductsResponse.Error(it))

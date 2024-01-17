@@ -8,7 +8,7 @@ import retrofit2.Response
 class ProductRepository {
     private val productService = ProductRetrofitInstance.productService
 
-    val fetchNetworkResult: Flow<ProductsResponse> = flow {
+    val fetchProductsResponse: Flow<ProductsResponse> = flow {
         emit(
             fetchAndParseProducts { productService.getProducts() },
         )
