@@ -69,11 +69,13 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // Added
-    implementation("androidx.compose.runtime:runtime-livedata:1.5.3")
+    implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
     testCompileOnly("pl.pragmatists:JUnitParams:1.1.1")
+    implementation("io.coil-kt:coil:2.5.0")
+    implementation("io.coil-kt:coil-compose:2.5.0")
 }

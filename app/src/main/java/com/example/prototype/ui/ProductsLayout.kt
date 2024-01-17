@@ -20,6 +20,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import com.example.prototype.Product
 import com.example.prototype.R
 import com.example.prototype.roundToNearestHalf
@@ -129,6 +131,15 @@ private fun Product(product: Product) {
         modifier = Modifier.padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        product.image?.also {
+            SubcomposeAsyncImage(
+                model = it,
+                contentDescription = null,
+                loading = {
+                    CircularProgressIndicator()
+                },
+            )
+        }
         Text(product.title)
         Text(product.description)
         Text(
