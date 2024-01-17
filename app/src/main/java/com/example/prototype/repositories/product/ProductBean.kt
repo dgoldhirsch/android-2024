@@ -2,7 +2,7 @@ package com.example.prototype.repositories.product
 
 import com.example.prototype.Product
 
-data class ProductBean(
+internal data class ProductBean(
     val title: String?,
     val description: String?,
     val rating: RatingBean? = null,
