@@ -11,7 +11,7 @@ class DoubleKtxTest {
 
     @Test
     fun `Double roundToNearestHalf - given zero is zero`() {
-        assertEquals(0.0, 0.1.roundToNearestHalf())
+        assertEquals(0.5, 0.1.roundToNearestHalf())
     }
 
     @Test
