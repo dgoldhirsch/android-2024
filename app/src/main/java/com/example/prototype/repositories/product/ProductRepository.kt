@@ -1,6 +1,5 @@
 package com.example.prototype.repositories.product
 
-import com.example.prototype.repositories.NetworkResult
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -9,33 +8,31 @@ import retrofit2.Response
 class ProductRepository {
     private val productService = ProductRetrofitInstance.productService
 
-    val fetchNetworkResult: Flow<NetworkResult> = flow {
+    val fetchNetworkResult: Flow<ProductsResponse> = flow {
         emit(
             fetchAndParseProducts { productService.getProducts() },
         )
     }
 
-    private class EmptyBodyException : Exception()
-    private class RetrofitNetworkException(code: Int, message: String) :
-        Exception("Retrofit Network Exception $code: $message")
-
     private suspend fun fetchAndParseProducts(
         apiCall: suspend () -> Response<List<ProductBean>>
-    ): NetworkResult {
+    ): ProductsResponse {
         return try {
-            return apiCall().toNetworkResponse()
+            return apiCall().toProductResponse()
         } catch (e: Exception) {
-            NetworkResult.Error(e)
+            ProductsResponse.Error(e)
         }
     }
 
-    private fun Response<List<ProductBean>>.toNetworkResponse() = if (isSuccessful) {
-        body()?.let { productBeans ->
-            NetworkResult.Success(productBeans.map { it.parse() }.toPersistentList())
-        } ?: NetworkResult.Error(
-            EmptyBodyException()
-        )
+    private fun Response<List<ProductBean>>.toProductResponse() = if (isSuccessful) {
+        val body = body().orEmpty()
+
+        if (body.isEmpty()) {
+            ProductsResponse.Error(NoProductsException)
+        } else {
+            ProductsResponse.Success(data = body.map { it.parse() }.toPersistentList())
+        }
     } else {
-        NetworkResult.Error(RetrofitNetworkException(code(), message()))
+        ProductsResponse.Error(UnsuccessfulHttpStatusException(message = message()))
     }
 }

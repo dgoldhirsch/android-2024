@@ -3,7 +3,7 @@ package com.example.prototype.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.prototype.Product
-import com.example.prototype.repositories.NetworkResult
+import com.example.prototype.repositories.product.ProductsResponse
 import com.example.prototype.repositories.product.ProductRepository
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -30,21 +30,21 @@ class ProductsViewModel : ViewModel() {
             repository.fetchNetworkResult
                 .flowOn(Dispatchers.IO)
                 .catch {
-                    emit(NetworkResult.Error(it))
+                    emit(ProductsResponse.Error(it))
                 }
-                .collect { networkResult ->
-                    when (networkResult) {
-                        is NetworkResult.Success<*> -> _uiState.update {
+                .collect { productsResponse ->
+                    when (productsResponse) {
+                        is ProductsResponse.Success -> _uiState.update {
                             uiState.value.asSuccess(
-                                networkResult.data as? ImmutableList<Product> ?: persistentListOf()
+                                productsResponse.data as? ImmutableList<Product> ?: persistentListOf()
                             )
                         }
 
-                        is NetworkResult.Loading -> _uiState.update { uiState.value.asLoading() }
-                        is NetworkResult.Error -> _uiState.update {
+                        is ProductsResponse.Loading -> _uiState.update { uiState.value.asLoading() }
+                        is ProductsResponse.Error -> _uiState.update {
                             uiState.value.asError(
                                 retryNumber = uiState.value.retryNumber + 1,
-                                errorMessage = networkResult.exception.message ?: "Bummer",
+                                errorMessage = productsResponse.exception.message ?: "Bummer",
                             )
                         }
                     }

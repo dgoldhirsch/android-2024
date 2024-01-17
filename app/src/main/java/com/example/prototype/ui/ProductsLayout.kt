@@ -32,22 +32,7 @@ fun ProductsLayout(viewModel: ProductsViewModel) {
     when {
         productsUiState.isError -> Error(productsUiState.errorMessage)
         productsUiState.isLoading -> Loading()
-        productsUiState.products.isEmpty() -> Empty()
         else -> Products(productsUiState.products)
-    }
-}
-
-@Composable
-@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
-fun Empty() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            textAlign = TextAlign.Center,
-            text = stringResource(id = R.string.no_products),
-        )
     }
 }
 
