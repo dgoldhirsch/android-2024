@@ -1,5 +1,6 @@
 package com.example.prototype.ui
 
+import android.graphics.fonts.FontStyle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -139,14 +141,18 @@ private fun Product(product: Product) {
                 },
             )
         }
-        Text(product.title)
+        Text(
+            fontWeight = FontWeight.Bold,
+            text = product.title,
+        )
         Text(product.description)
         Text(
-            stringResource(
+            fontWeight = FontWeight.Bold,
+            text = stringResource(
                 id = R.string.rating,
                 product.rating.roundToNearestHalf(),
                 product.count
-            )
+            ),
         )
     }
 }
