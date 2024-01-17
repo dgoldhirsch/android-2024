@@ -1,0 +1,26 @@
+  name: ci
+  on: [push]
+  jobs:
+    compile:
+      runs-on: ubuntu-latest
+      steps:
+        - run: echo "Android-2024 CI Checking Out"
+        - uses: actions/checkout@v4
+
+        - run: echo "Android-2024 Setting up JDK 17"
+        - name: set up JDK 17
+          uses: actions/setup-java@v4
+          with:
+            java-version: '17'
+            distribution: 'temurin'
+#            cache: gradle
+
+        - run: echo "Android-2024 Chmod to execute gradlew"
+        - name: Grant execute permission for gradlew
+          run: chmod +x gradlew
+
+        - run: echo "Android-2024 Build"
+        - name: Build with Gradle
+          run: ./gradlew build
+
+        - run: echo "Android-2024 Finished With Status report=${{ job.status }}"
