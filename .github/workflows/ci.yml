@@ -1,7 +1,7 @@
   name: ci
   on: [push]
   jobs:
-    compile:
+    buildAndUnitTest:
       runs-on: ubuntu-latest
       steps:
         - run: echo "Android-2024 CI Checking Out"
@@ -21,6 +21,6 @@
 
         - run: echo "Android-2024 Build"
         - name: Build with Gradle
-          run: ./gradlew build
+          run: ./gradlew --console=verbose build
 
         - run: echo "Android-2024 Finished With Status report=${{ job.status }}"
