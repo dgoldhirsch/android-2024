@@ -2,10 +2,14 @@ package com.example.prototype.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -62,14 +66,29 @@ fun Error(message: String = stringResource(R.string.no_details)) {
 @Composable
 @Preview(showBackground = true, backgroundColor = 0xFFFFFF)
 fun Loading(text: String = stringResource(R.string.loading)) {
-    Column(
+    LazyColumn(
+        contentPadding = PaddingValues(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text(
-            textAlign = TextAlign.Center,
-            text = text,
-        )
+        item {
+            Text(
+                textAlign = TextAlign.Center,
+                text = text,
+            )
+        }
+
+        // Surely, there's better way to get some space between the two column items?
+        item {
+            Text(text = "   ")
+        }
+
+        item {
+            CircularProgressIndicator(
+                modifier = Modifier.width(32.dp),
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
     }
 }
 
