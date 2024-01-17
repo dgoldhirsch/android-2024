@@ -2,11 +2,8 @@ package com.example.prototype.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.prototype.Product
 import com.example.prototype.repositories.product.ProductsResponse
 import com.example.prototype.repositories.product.ProductRepository
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,23 +29,20 @@ class ProductsViewModel : ViewModel() {
                 .catch {
                     emit(ProductsResponse.Error(it))
                 }
-                .collect { productsResponse ->
-                    when (productsResponse) {
-                        is ProductsResponse.Success -> _uiState.update {
-                            uiState.value.asSuccess(
-                                productsResponse.data as? ImmutableList<Product> ?: persistentListOf()
-                            )
-                        }
+                .collect { productsResponse -> reduceLoadedProducts(productsResponse) }
+        }
+    }
 
-                        is ProductsResponse.Loading -> _uiState.update { uiState.value.asLoading() }
-                        is ProductsResponse.Error -> _uiState.update {
-                            uiState.value.asError(
-                                retryNumber = uiState.value.retryNumber + 1,
-                                errorMessage = productsResponse.exception.message ?: "Bummer",
-                            )
-                        }
-                    }
-                }
+    private fun reduceLoadedProducts(productsResponse: ProductsResponse) {
+        when (productsResponse) {
+            is ProductsResponse.Success -> _uiState.update { uiState.value.asSuccess(productsResponse.data) }
+            is ProductsResponse.Loading -> _uiState.update { uiState.value.asLoading() }
+            is ProductsResponse.Error -> _uiState.update {
+                uiState.value.asError(
+                    retryNumber = uiState.value.retryNumber + 1,
+                    errorMessage = productsResponse.exception.message ?: "Bummer",
+                )
+            }
         }
     }
 }

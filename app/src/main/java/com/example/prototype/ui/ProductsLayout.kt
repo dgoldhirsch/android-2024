@@ -25,10 +25,11 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.prototype.Product
 import com.example.prototype.R
 import com.example.prototype.roundToNearestHalf
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-fun ProductsLayout(viewModel: ProductsViewModel) {
-    val productsUiState by viewModel.uiState.collectAsState()
+fun ProductsLayout(productUiStateFlow: StateFlow<ProductsUiState>) {
+    val productsUiState by productUiStateFlow.collectAsState()
     when {
         productsUiState.isError -> Error(productsUiState.errorMessage)
         productsUiState.isLoading -> Loading()

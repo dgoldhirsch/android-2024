@@ -1,10 +1,11 @@
 package com.example.prototype.repositories.product
 
 import com.example.prototype.Product
+import kotlinx.collections.immutable.ImmutableList
 
 interface ProductsResponse {
     object Loading : ProductsResponse
-    data class Success(val data: List<Product>) : ProductsResponse
+    data class Success(val data: ImmutableList<Product>) : ProductsResponse
     data class Error(val exception: Throwable) : ProductsResponse
 }
 
