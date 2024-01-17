@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 class ProductBeanTest {
 
     @Test
-    fun `asProduct - given an empty bean - populates safe values`() {
+    fun `parse - given an empty bean - populates safe values`() {
         assertEquals(
             Product(),
             subject().parse(),
@@ -20,5 +20,6 @@ class ProductBeanTest {
     ): ProductBean = ProductBean(
         title = name,
         description = description,
+        image = null,
     )
 }
