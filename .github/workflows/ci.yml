@@ -21,6 +21,6 @@
 
         - run: echo "Android-2024 Build"
         - name: Build with Gradle
-          run: ./gradlew --console=verbose build
+          run: ./gradlew --console=rich build
 
         - run: echo "Android-2024 Finished With Status report=${{ job.status }}"
