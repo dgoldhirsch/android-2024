@@ -3,9 +3,10 @@
 A sample app using a reasonable tech stack containing the following elements:
 
 * Jetpack Compose
-* Simple, uni-directional architecture implemented with ViewModel, StateFlow
-* Repository and Data Source architecture
-* Coroutines/Flow
+* Jetpack Navigation
+* Flow and Coroutines
+* Uni-directional Architecture based on State Flow
+* Data Layer = Repository + Data Source Architecture
 * Hilt
 
 ## Architecture
