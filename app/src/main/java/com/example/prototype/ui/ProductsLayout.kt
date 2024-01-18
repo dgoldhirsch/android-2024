@@ -12,6 +12,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,11 +31,20 @@ import com.example.prototype.Product
 import com.example.prototype.R
 import com.example.prototype.roundToNearestHalf
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 @Composable
 fun AppNavHost(
-    navController: NavHostController
+    navController: NavHostController,
+    navigator: Navigator,
 ) {
+    LaunchedEffect("navigation") {
+        navigator.sharedFlow.onEach {
+            navController.navigate(it.label)
+        }.launchIn(this)
+    }
+
     NavHost(
         navController = navController,
         startDestination = "products"
