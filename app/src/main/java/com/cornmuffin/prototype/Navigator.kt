@@ -2,8 +2,11 @@ package com.cornmuffin.prototype
 
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class Navigator {
+@Singleton
+class Navigator @Inject constructor () {
     private val _sharedFlow = MutableSharedFlow<NavTarget>(extraBufferCapacity = 1)
     val sharedFlow = _sharedFlow.asSharedFlow()
 

@@ -10,8 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.cornmuffin.prototype.ui.AppNavHost
 import com.cornmuffin.prototype.ui.theme.PrototypeTheme
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var navigator: Navigator
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -24,7 +29,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     AppNavHost(
                         navController = navController,
-                        navigator = Navigator() // TODO Inject app-scoped, 'cause we want only one
+                        navigator = navigator
                     )
                 }
             }

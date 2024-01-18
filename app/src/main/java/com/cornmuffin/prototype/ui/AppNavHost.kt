@@ -2,6 +2,7 @@ package com.cornmuffin.prototype.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -28,7 +29,7 @@ fun AppNavHost(
         startDestination = "products"
     ) {
         composable("products") {
-            ProductsLayout(productUiStateFlow = viewModel<ProductsViewModel>().uiState)
+            ProductsLayout(productUiStateFlow = hiltViewModel<ProductsViewModel>().uiState)
         }
     }
 }

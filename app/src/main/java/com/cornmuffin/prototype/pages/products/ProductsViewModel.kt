@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.cornmuffin.prototype.repositories.products.ProductsResponse
 import com.cornmuffin.prototype.repositories.products.ProductsRepository
 import com.cornmuffin.prototype.repositories.products.networkdatasource.ProductsNetworkDataSource
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,11 +15,14 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ProductsViewModel : ViewModel() {
+@HiltViewModel
+class ProductsViewModel @Inject constructor(
+    private val repository: ProductsRepository
+): ViewModel() {
     private val _uiState = MutableStateFlow(ProductsUiState())
     val uiState: StateFlow<ProductsUiState> = _uiState.asStateFlow()
-    private val repository = ProductsRepository(ProductsNetworkDataSource())
 
     init {
         loadProducts()

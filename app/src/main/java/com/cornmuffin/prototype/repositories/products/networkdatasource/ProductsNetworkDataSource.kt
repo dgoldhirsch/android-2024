@@ -10,8 +10,11 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class ProductsNetworkDataSource {
+@Singleton
+internal class ProductsNetworkDataSource @Inject constructor() {
     private val productService = ProductRetrofitInstance.productService
 
     val fetchProductsResponse: Flow<ProductsResponse> = flow {
