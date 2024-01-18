@@ -1,4 +1,4 @@
-package com.cornmuffin.prototype.pages.products
+package com.cornmuffin.prototype.ui.products
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,7 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
-import com.cornmuffin.prototype.repositories.products.Product
+import com.cornmuffin.prototype.data.products.Product
 import com.cornmuffin.prototype.roundToNearestHalf
 import com.cornmuffin.prototype.R
 import kotlinx.coroutines.flow.StateFlow

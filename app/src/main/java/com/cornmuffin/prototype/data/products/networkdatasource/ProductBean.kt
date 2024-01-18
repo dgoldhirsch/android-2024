@@ -1,6 +1,6 @@
-package com.cornmuffin.prototype.repositories.products.networkdatasource
+package com.cornmuffin.prototype.data.products.networkdatasource
 
-import com.cornmuffin.prototype.repositories.products.Product
+import com.cornmuffin.prototype.data.products.Product
 
 internal data class ProductBean(
     val title: String?,

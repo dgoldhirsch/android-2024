@@ -1,8 +1,8 @@
-package com.cornmuffin.prototype.repositories.products.networkdatasource
+package com.cornmuffin.prototype.data.products.networkdatasource
 
-import com.cornmuffin.prototype.repositories.products.NoProductsException
-import com.cornmuffin.prototype.repositories.products.ProductsResponse
-import com.cornmuffin.prototype.repositories.products.UnsuccessfulHttpStatusException
+import com.cornmuffin.prototype.data.products.NoProductsException
+import com.cornmuffin.prototype.data.products.ProductsResponse
+import com.cornmuffin.prototype.data.products.UnsuccessfulHttpStatusException
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

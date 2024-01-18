@@ -1,4 +1,4 @@
-package com.cornmuffin.prototype.repositories.products
+package com.cornmuffin.prototype.data.products
 
 data class Product(
     val title: String = "",

@@ -1,6 +1,6 @@
-package com.cornmuffin.prototype.pages.products
+package com.cornmuffin.prototype.ui.products
 
-import com.cornmuffin.prototype.repositories.products.Product
+import com.cornmuffin.prototype.data.products.Product
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 

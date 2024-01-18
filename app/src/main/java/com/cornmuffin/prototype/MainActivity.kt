@@ -8,7 +8,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.cornmuffin.prototype.ui.AppNavHost
 import com.cornmuffin.prototype.ui.theme.PrototypeTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

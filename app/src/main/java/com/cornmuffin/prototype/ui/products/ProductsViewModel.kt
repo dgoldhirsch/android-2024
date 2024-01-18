@@ -1,11 +1,9 @@
-package com.cornmuffin.prototype.pages.products
+package com.cornmuffin.prototype.ui.products
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cornmuffin.prototype.repositories.products.ProductsResponse
-import com.cornmuffin.prototype.repositories.products.ProductsRepository
-import com.cornmuffin.prototype.repositories.products.networkdatasource.ProductsNetworkDataSource
-import dagger.hilt.android.AndroidEntryPoint
+import com.cornmuffin.prototype.data.products.ProductsResponse
+import com.cornmuffin.prototype.data.products.ProductsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

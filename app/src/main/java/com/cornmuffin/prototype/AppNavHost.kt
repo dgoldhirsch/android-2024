@@ -1,15 +1,13 @@
-package com.cornmuffin.prototype.ui
+package com.cornmuffin.prototype
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.cornmuffin.prototype.Navigator
-import com.cornmuffin.prototype.pages.products.ProductsLayout
-import com.cornmuffin.prototype.pages.products.ProductsViewModel
+import com.cornmuffin.prototype.ui.products.ProductsLayout
+import com.cornmuffin.prototype.ui.products.ProductsViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
