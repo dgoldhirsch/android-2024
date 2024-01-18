@@ -1,4 +1,4 @@
-package com.example.prototype
+package com.cornmuffin.prototype
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,9 +8,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.example.prototype.ui.AppNavHost
-import com.example.prototype.ui.Navigator
-import com.example.prototype.ui.theme.PrototypeTheme
+import com.cornmuffin.prototype.ui.AppNavHost
+import com.cornmuffin.prototype.ui.theme.PrototypeTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

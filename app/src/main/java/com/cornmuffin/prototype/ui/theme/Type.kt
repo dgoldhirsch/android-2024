@@ -1,4 +1,4 @@
-package com.example.prototype.ui.theme
+package com.cornmuffin.prototype.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

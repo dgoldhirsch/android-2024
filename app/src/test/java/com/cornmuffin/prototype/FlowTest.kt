@@ -1,4 +1,4 @@
-package com.example.prototype
+package com.cornmuffin.prototype
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch

@@ -1,4 +1,4 @@
-package com.example.prototype.ui
+package com.cornmuffin.prototype.pages.products
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,33 +27,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import coil.compose.SubcomposeAsyncImage
-import com.example.prototype.Product
+import com.cornmuffin.prototype.Navigator
+import com.cornmuffin.prototype.repositories.products.Product
+import com.cornmuffin.prototype.roundToNearestHalf
 import com.example.prototype.R
-import com.example.prototype.roundToNearestHalf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-
-@Composable
-fun AppNavHost(
-    navController: NavHostController,
-    navigator: Navigator,
-) {
-    LaunchedEffect("navigation") {
-        navigator.sharedFlow.onEach {
-            navController.navigate(it.label)
-        }.launchIn(this)
-    }
-
-    NavHost(
-        navController = navController,
-        startDestination = "products"
-    ) {
-        composable("products") {
-            ProductsLayout(productUiStateFlow = viewModel<ProductsViewModel>().uiState)
-        }
-    }
-}
 
 @Composable
 fun ProductsLayout(productUiStateFlow: StateFlow<ProductsUiState>) {

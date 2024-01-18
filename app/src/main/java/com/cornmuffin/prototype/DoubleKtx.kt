@@ -1,4 +1,4 @@
-package com.example.prototype
+package com.cornmuffin.prototype
 
 import kotlin.math.roundToInt
 

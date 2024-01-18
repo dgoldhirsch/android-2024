@@ -1,6 +1,5 @@
-package com.example.prototype.repositories.product
+package com.cornmuffin.prototype.repositories.products
 
-import com.example.prototype.Product
 import kotlinx.collections.immutable.ImmutableList
 
 interface ProductsResponse {

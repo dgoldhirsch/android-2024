@@ -1,6 +1,7 @@
-package com.example.prototype
+package com.cornmuffin.prototype
 
-import com.example.prototype.repositories.product.ProductBean
+import com.cornmuffin.prototype.repositories.products.Product
+import com.cornmuffin.prototype.repositories.products.networkdatasource.ProductBean
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

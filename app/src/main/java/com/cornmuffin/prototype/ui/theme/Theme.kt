@@ -1,4 +1,4 @@
-package com.example.prototype.ui.theme
+package com.cornmuffin.prototype.ui.theme
 
 import android.app.Activity
 import android.os.Build

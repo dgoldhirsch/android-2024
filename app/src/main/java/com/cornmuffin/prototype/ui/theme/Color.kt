@@ -1,4 +1,4 @@
-package com.example.prototype.ui.theme
+package com.cornmuffin.prototype.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

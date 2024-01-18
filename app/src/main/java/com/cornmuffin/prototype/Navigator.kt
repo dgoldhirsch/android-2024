@@ -1,4 +1,4 @@
-package com.example.prototype.ui
+package com.cornmuffin.prototype
 
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow

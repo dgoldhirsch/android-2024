@@ -1,4 +1,4 @@
-package com.example.prototype
+package com.cornmuffin.prototype
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

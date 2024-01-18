@@ -1,9 +1,10 @@
-package com.example.prototype.ui
+package com.cornmuffin.prototype.pages.products
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.prototype.repositories.product.ProductsResponse
-import com.example.prototype.repositories.product.ProductRepository
+import com.cornmuffin.prototype.repositories.products.ProductsResponse
+import com.cornmuffin.prototype.repositories.products.ProductsRepository
+import com.cornmuffin.prototype.repositories.products.networkdatasource.ProductsNetworkDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 class ProductsViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ProductsUiState())
     val uiState: StateFlow<ProductsUiState> = _uiState.asStateFlow()
-    private val repository = ProductRepository()
+    private val repository = ProductsRepository(ProductsNetworkDataSource())
 
     init {
         loadProducts()
