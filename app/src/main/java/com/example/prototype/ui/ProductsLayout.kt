@@ -21,11 +21,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import coil.compose.SubcomposeAsyncImage
 import com.example.prototype.Product
 import com.example.prototype.R
 import com.example.prototype.roundToNearestHalf
 import kotlinx.coroutines.flow.StateFlow
+
+@Composable
+fun AppNavHost(
+    navController: NavHostController
+) {
+    NavHost(
+        navController = navController,
+        startDestination = "products"
+    ) {
+        composable("products") {
+            ProductsLayout(productUiStateFlow = viewModel<ProductsViewModel>().uiState)
+        }
+    }
+}
 
 @Composable
 fun ProductsLayout(productUiStateFlow: StateFlow<ProductsUiState>) {

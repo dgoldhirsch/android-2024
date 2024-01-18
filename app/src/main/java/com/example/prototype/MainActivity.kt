@@ -7,9 +7,9 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import com.example.prototype.ui.ProductsLayout
+import androidx.navigation.compose.rememberNavController
+import com.example.prototype.ui.AppNavHost
 import com.example.prototype.ui.ProductsViewModel
 import com.example.prototype.ui.theme.PrototypeTheme
 
@@ -19,12 +19,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val navController = rememberNavController()
+
             PrototypeTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    ProductsLayout(viewModel.uiState)
+                    AppNavHost(navController = navController)
                 }
             }
         }
