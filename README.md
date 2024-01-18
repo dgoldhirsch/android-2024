@@ -3,9 +3,10 @@
 A sample app using a reasonable tech stack containing the following elements:
 
 * Jetpack Compose
-* Simple, uni-directional architecture implemented with ViewModel and StateFlow
-* Flow-based repository
-* Coroutines
+* Simple, uni-directional architecture implemented with ViewModel, StateFlow
+* Repository and Data Source architecture
+* Coroutines/Flow
+* Hilt
 
 ## Architecture
 This is a unidirectional (reactive) app implemented with a view model that maintains a _ui state_ object that is collected-as-state by the Compose main layout.
