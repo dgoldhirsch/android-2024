@@ -17,3 +17,7 @@ The repository is modelled to return a _response_ that if successful contains sa
 
 Currently the app consists of a single page populated from a single repository, so, it's all very simple.
 
+## The Silly App
+
+![Screen Shot 2024-01-18 at 4 47 59 PM](https://github.com/dgoldhirsch/android-2024/assets/101699/9b042461-c57a-401b-9fa8-72815c908e60)
+
