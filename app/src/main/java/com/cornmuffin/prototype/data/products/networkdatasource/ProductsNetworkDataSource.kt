@@ -25,22 +25,21 @@ internal class ProductsNetworkDataSource @Inject constructor() {
 
     private suspend fun fetchAndParseProducts(
         apiCall: suspend () -> Response<List<ProductBean>>
-    ): ProductsResponse {
-        return try {
-            return apiCall().toProductResponse()
-        } catch (e: Exception) {
-            ProductsResponse.Error(e)
-        }
+    ): ProductsResponse = try {
+        apiCall().toProductResponse()
+    } catch (e: Exception) {
+        ProductsResponse.Error(e)
     }
 
     private fun Response<List<ProductBean>>.toProductResponse() = if (isSuccessful) {
-        val body = body().orEmpty()
+        val body = body()
 
-        if (body.isEmpty()) {
+        if (body.isNullOrEmpty()) {
             ProductsResponse.Error(NoProductsException)
         } else {
             ProductsResponse.Success(data = body.map { it.parse() }.toPersistentList())
         }
+
     } else {
         ProductsResponse.Error(UnsuccessfulHttpStatusException(message = message()))
     }
