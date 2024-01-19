@@ -21,7 +21,7 @@ android {
     defaultConfig {
         applicationId = "com.cornmuffin.prototype"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -83,7 +83,7 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6")
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
     testCompileOnly("pl.pragmatists:JUnitParams:1.1.1")
@@ -93,15 +93,17 @@ dependencies {
     val navVersion = "2.7.6"
     implementation("androidx.navigation:navigation-compose:$navVersion")
 
-    // Hilt
-    implementation("com.google.dagger:hilt-android:2.48.1")
-    kapt("com.google.dagger:hilt-android-compiler:2.48.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
-    implementation("androidx.hilt:hilt-navigation-fragment:1.1.0")
+    val hiltVersion = "2.48.1" // 1/18/2024 Be careful about updating this.  2.50 doesn't seem to compile with kapt or ksp or something.
+    val hiltNavigationComposeVersion = "1.1.0"
+    implementation("com.google.dagger:hilt-android:$hiltVersion")
+    kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
+    implementation("androidx.hilt:hilt-navigation-compose:$hiltNavigationComposeVersion")
+    implementation("androidx.hilt:hilt-navigation-fragment:$hiltNavigationComposeVersion")
 
     // Room
-    implementation("androidx.room:room-runtime:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
 }
 
 // Allow references to generated code
