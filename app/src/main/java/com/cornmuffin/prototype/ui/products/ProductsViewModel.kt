@@ -28,7 +28,7 @@ class ProductsViewModel @Inject constructor(
 
     private fun loadProducts() {
         viewModelScope.launch {
-            repository.fetchProductsResponse
+            repository.products
                 .flowOn(Dispatchers.IO)
                 .catch {
                     emit(ProductsResponse.Error(it))

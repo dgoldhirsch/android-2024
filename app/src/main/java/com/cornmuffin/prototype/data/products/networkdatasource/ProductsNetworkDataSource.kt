@@ -4,8 +4,6 @@ import com.cornmuffin.prototype.data.products.NoProductsException
 import com.cornmuffin.prototype.data.products.ProductsResponse
 import com.cornmuffin.prototype.data.products.UnsuccessfulHttpStatusException
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -15,18 +13,9 @@ import javax.inject.Singleton
 
 @Singleton
 internal class ProductsNetworkDataSource @Inject constructor() {
-    private val productService = ProductRetrofitInstance.productService
 
-    val fetchProductsResponse: Flow<ProductsResponse> = flow {
-        emit(
-            fetchAndParseProducts { productService.getProducts() },
-        )
-    }
-
-    private suspend fun fetchAndParseProducts(
-        apiCall: suspend () -> Response<List<ProductBean>>
-    ): ProductsResponse = try {
-        apiCall().toProductResponse()
+    suspend fun fetchAndParseProducts(): ProductsResponse = try {
+        ProductRetrofitInstance.productService.getProducts().toProductResponse()
     } catch (e: Exception) {
         ProductsResponse.Error(e)
     }
