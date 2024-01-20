@@ -3,8 +3,8 @@ package com.cornmuffin.prototype.ui.products
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornmuffin.prototype.data.products.Product
-import com.cornmuffin.prototype.data.products.ProductsResponse
 import com.cornmuffin.prototype.data.products.ProductsRepository
+import com.cornmuffin.prototype.data.products.ProductsResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
