@@ -7,7 +7,7 @@ import kotlinx.collections.immutable.persistentListOf
 data class ProductsUiState(
     val errorMessage: String = "",
     val isError: Boolean = false,
-    val isLoading: Boolean = true,
+    val isLoading: Boolean = false,
     val products: ImmutableList<Product> = persistentListOf(),
     val retryNumber: Int = 0,
 ) {

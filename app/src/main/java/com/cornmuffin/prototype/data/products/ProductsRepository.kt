@@ -1,6 +1,6 @@
 package com.cornmuffin.prototype.data.products
 
-import com.cornmuffin.prototype.data.products.networkdatasource.ProductsNetworkDataSource
+import com.cornmuffin.prototype.data.products.datasources.ProductsNetworkDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject

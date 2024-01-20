@@ -1,7 +1,7 @@
 package com.cornmuffin.prototype
 
 import com.cornmuffin.prototype.data.products.Product
-import com.cornmuffin.prototype.data.products.networkdatasource.ProductBean
+import com.cornmuffin.prototype.data.products.datasources.ProductBean
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

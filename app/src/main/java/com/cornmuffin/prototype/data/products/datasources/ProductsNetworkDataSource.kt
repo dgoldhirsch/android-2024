@@ -1,4 +1,4 @@
-package com.cornmuffin.prototype.data.products.networkdatasource
+package com.cornmuffin.prototype.data.products.datasources
 
 import com.cornmuffin.prototype.data.products.NoProductsException
 import com.cornmuffin.prototype.data.products.ProductsResponse
@@ -10,9 +10,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.min
 
 @Singleton
 internal class ProductsNetworkDataSource @Inject constructor() {
+    private var cursor: Int = 0 // hack, to emulate getting different data each fetch
 
     suspend fun fetchAndParseProducts(): ProductsResponse = try {
         ProductRetrofitInstance.productService.getProducts().toProductResponse()
@@ -26,7 +28,13 @@ internal class ProductsNetworkDataSource @Inject constructor() {
         if (body.isNullOrEmpty()) {
             ProductsResponse.Error(NoProductsException)
         } else {
-            ProductsResponse.Success(data = body.map { it.parse() }.toPersistentList())
+            val chunkRange = cursor..min(cursor + CHUNK_SIZE, body.size - 1)
+            println(">>>>> NETWORK CHUNK $chunkRange")
+
+            // Emulate getting different product beans each request
+            val chunkOfProductBeans = body.slice(chunkRange)
+            cursor = (cursor + chunkRange.last + 1) % body.size
+            ProductsResponse.Success(data = chunkOfProductBeans.map { it.parse() }.toPersistentList())
         }
 
     } else {
@@ -49,5 +57,9 @@ internal class ProductsNetworkDataSource @Inject constructor() {
             @GET("products")
             suspend fun getProducts(): Response<List<ProductBean>>
         }
+    }
+
+    private companion object {
+        const val CHUNK_SIZE = 3
     }
 }

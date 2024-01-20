@@ -20,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "com.cornmuffin.prototype"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -92,6 +92,9 @@ dependencies {
 
     val navVersion = "2.7.6"
     implementation("androidx.navigation:navigation-compose:$navVersion")
+
+    // https://dev.to/andreym/how-to-do-a-material-3-pull-refresh-15b0
+    implementation("eu.bambooapps:compose-material3-pullrefresh:1.0.0")
 
     val hiltVersion = "2.48.1" // 1/18/2024 Be careful about updating this.  2.50 doesn't seem to compile with kapt or ksp or something.
     val hiltNavigationComposeVersion = "1.1.0"
