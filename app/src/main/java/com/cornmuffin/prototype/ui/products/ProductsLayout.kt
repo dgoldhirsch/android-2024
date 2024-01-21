@@ -103,7 +103,7 @@ fun Products(
             onRefresh = {
                 isRefreshing = true
                 coroutineScope.launch {
-                    viewModel.initUiStateAndUpdateCache()
+                    viewModel.initUiState()
                     isRefreshing = false
                 }
             }

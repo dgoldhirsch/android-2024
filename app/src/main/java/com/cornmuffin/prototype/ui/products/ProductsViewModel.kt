@@ -30,10 +30,10 @@ class ProductsViewModel @Inject constructor(
     val uiState: StateFlow<ProductsUiState> = _uiState.asStateFlow()
 
     init {
-        initUiStateAndUpdateCache()
+        initUiState()
     }
 
-    fun initUiStateAndUpdateCache() {
+    fun initUiState() {
         viewModelScope.launch {
             when {
                 // Drive UI and prime cache from network call
@@ -41,30 +41,38 @@ class ProductsViewModel @Inject constructor(
                     println(">>>>> CACHE IS EMPTY: DRIVE UI FROM NETWORK")
                     becomeLoading()
                     fetchFromNetwork { onFinishedLoading(it) }
+                    fetchFromNetwork { onFinishedUpdating(it) }
                 }
 
                 // Display whatever is in cache, and update cache from network call
                 else -> {
                     println(">>>>> CACHE IS FULL: REDUCE...")
                     becomeSuccessfullyLoaded(cachedProducts)
-                    launch {
-                        println(">>>>> KICK OFF NETWORK")
-                        fetchFromNetwork { onFinishedUpdating(it) }
-                        // Don't reduce with updated data.
-                        // If/when user refreshes the UI, they'll get the updated data from the cache
-                    }
+                    println(">>>>> KICK OFF NETWORK")
+                    fetchFromNetwork { onFinishedUpdating(it) }
+                    // Don't reduce with updated data.
+                    // If/when user refreshes the UI, they'll get the updated data from the cache
                 }
             }
         }
     }
 
+    private fun becomeError(message: String) {
+        _uiState.update {
+            it.asError(
+                retryNumber = it.retryNumber + 1,
+                errorMessage = message,
+            )
+        }
+    }
+
     private fun becomeLoading() {
-        _uiState.update { uiState.value.asLoading() }
+        _uiState.update { it.asLoading() }
     }
 
     private fun becomeSuccessfullyLoaded(products: ImmutableList<Product>) {
+        _uiState.update { it.asSuccess(products) }
         updateCacheUsing(products)
-        _uiState.update { uiState.value.asSuccess(products) }
     }
 
     private suspend fun fetchFromNetwork(onResponse: (ProductsResponse) -> Unit) {
@@ -78,13 +86,7 @@ class ProductsViewModel @Inject constructor(
 
     private fun onFinishedLoading(productsResponse: ProductsResponse) {
         when (productsResponse) {
-            is ProductsResponse.Error -> _uiState.update {
-                uiState.value.asError(
-                    retryNumber = uiState.value.retryNumber + 1,
-                    errorMessage = productsResponse.exception.message ?: "Bummer",
-                )
-            }
-
+            is ProductsResponse.Error -> becomeError(productsResponse.exception.message ?: "Bummer")
             is ProductsResponse.Loading -> becomeLoading()
             is ProductsResponse.Success -> becomeSuccessfullyLoaded(productsResponse.data)
         }
