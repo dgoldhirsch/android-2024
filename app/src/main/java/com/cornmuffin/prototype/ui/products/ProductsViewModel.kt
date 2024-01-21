@@ -49,7 +49,7 @@ class ProductsViewModel @Inject constructor(
                     becomeLoading()
 
                     viewModelScope.launch {
-                        fetchFromNetwork {
+                        fetchFromNetwork().collect {
                             reduce(Action.LoadFinished(it))
                         }
                     }
@@ -85,7 +85,7 @@ class ProductsViewModel @Inject constructor(
                     becomeRefreshing()
 
                     viewModelScope.launch {
-                        fetchFromNetwork {
+                        fetchFromNetwork().collect {
                             reduce(Action.RefreshFinished(it))
                         }
                     }
@@ -153,12 +153,9 @@ class ProductsViewModel @Inject constructor(
         _uiState.update { it.asRefreshing() }
     }
 
-    private suspend fun fetchFromNetwork(onResponse: (ProductsResponse) -> Unit) {
-        repository.products
-            .flowOn(Dispatchers.IO)
-            .catch {
-                emit(ProductsResponse.Error(it))
-            }
-            .collect(onResponse)
-    }
+    private suspend fun fetchFromNetwork() = repository.products
+        .flowOn(Dispatchers.IO)
+        .catch {
+            emit(ProductsResponse.Error(it))
+        }
 }
