@@ -114,7 +114,6 @@ class ProductsViewModel @Inject constructor(
                 }
 
                 else -> state
-
             }
         }
     }
@@ -123,6 +122,12 @@ class ProductsViewModel @Inject constructor(
         productsStateMachine.reduce(Action.Load)
     }
 
+    /**
+     * Allow UI layer to change the state, e.g., as when the user clicks on a 'Retry' button
+     * or does a pull-to-refresh swipe.  So far, there is no reason why this should be used
+     * from the repository or data source classes, although it ought to work fine.  Instead,
+     * the view model is collecting from repository flows.
+     */
     internal fun reduce(action: Action) {
         productsStateMachine.reduce(action)
     }

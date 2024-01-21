@@ -62,16 +62,21 @@ fun Error(message: String = stringResource(R.string.no_details)) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text(
-            textAlign = TextAlign.Center,
-            text = stringResource(id = R.string.error, message),
-        )
-
-        Button(onClick = { viewModel.reduce(ProductsViewModel.Action.Retry) }) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+        ) {
             Text(
                 textAlign = TextAlign.Center,
-                text = stringResource(id = R.string.retry)
+                text = stringResource(id = R.string.error, message),
             )
+
+            Button(onClick = { viewModel.reduce(ProductsViewModel.Action.Retry) }) {
+                Text(
+                    textAlign = TextAlign.Center,
+                    text = stringResource(id = R.string.retry)
+                )
+            }
         }
     }
 }
