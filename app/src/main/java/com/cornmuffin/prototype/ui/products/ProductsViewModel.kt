@@ -7,7 +7,6 @@ import com.cornmuffin.prototype.data.products.ProductsRepository
 import com.cornmuffin.prototype.data.products.ProductsResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,32 +21,31 @@ import javax.inject.Inject
 class ProductsViewModel @Inject constructor(
     private val repository: ProductsRepository
 ) : ViewModel() {
-    private val _cache: MutableSet<Product> = mutableSetOf()
-    private val cachedProducts: ImmutableList<Product>
-        get() = _cache.toPersistentList()
-
     private val _uiState = MutableStateFlow(ProductsUiState())
     val uiState: StateFlow<ProductsUiState> = _uiState.asStateFlow()
 
     enum class State {
         Uninitialized,
         Error,
-        Loading,
         Loaded,
+        Loading,
         Refreshing,
     }
 
     sealed interface Action {
         data object Load : Action
-        data class LoadFinished(val productsResponse: ProductsResponse): Action
+        data class LoadFinished(val productsResponse: ProductsResponse) : Action
         data object Refresh : Action
-        data class RefreshFinished(val productsResponse: ProductsResponse): Action
+        data class RefreshFinished(val productsResponse: ProductsResponse) : Action
+        data object Retry : Action
     }
 
     private val productsStateMachine = ProductsStateMachine { action, state ->
         when (state) {
-            State.Uninitialized -> when (action) {
-                is Action.Load -> {
+            State.Uninitialized,
+            State.Error -> when (action) {
+                is Action.Load,
+                is Action.Retry -> {
                     becomeLoading()
 
                     viewModelScope.launch {
@@ -84,7 +82,7 @@ class ProductsViewModel @Inject constructor(
 
             State.Loaded -> when (action) {
                 is Action.Refresh -> {
-                    becomeRefreshing(cachedProducts) // TODO better modify existing composition without re-rendering products
+                    becomeRefreshing()
 
                     viewModelScope.launch {
                         fetchFromNetwork {
@@ -118,8 +116,6 @@ class ProductsViewModel @Inject constructor(
                 else -> state
 
             }
-            // No-op
-            else -> state
         }
     }
 
@@ -146,10 +142,9 @@ class ProductsViewModel @Inject constructor(
 
     private fun becomeSuccessfullyLoaded(products: ImmutableList<Product>) {
         _uiState.update { it.asSuccess(products) }
-        updateCacheUsing(products)
     }
 
-    private fun becomeRefreshing(products: ImmutableList<Product>) {
+    private fun becomeRefreshing() {
         _uiState.update { it.asRefreshing() }
     }
 
@@ -160,11 +155,5 @@ class ProductsViewModel @Inject constructor(
                 emit(ProductsResponse.Error(it))
             }
             .collect(onResponse)
-    }
-
-    private fun updateCacheUsing(products: ImmutableList<Product>) {
-        println(">>>>> UPDATING CACHE WITH $products")
-        _cache.clear()
-        _cache.addAll(products)
     }
 }

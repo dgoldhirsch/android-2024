@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,6 +56,8 @@ fun ProductsLayout(productUiStateFlow: StateFlow<ProductsUiState>) {
 @Composable
 @Preview(showBackground = true, backgroundColor = 0xFFFFFF)
 fun Error(message: String = stringResource(R.string.no_details)) {
+    val viewModel = hiltViewModel<ProductsViewModel>()
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -63,6 +66,13 @@ fun Error(message: String = stringResource(R.string.no_details)) {
             textAlign = TextAlign.Center,
             text = stringResource(id = R.string.error, message),
         )
+
+        Button(onClick = { viewModel.reduce(ProductsViewModel.Action.Retry) }) {
+            Text(
+                textAlign = TextAlign.Center,
+                text = stringResource(id = R.string.retry)
+            )
+        }
     }
 }
 
