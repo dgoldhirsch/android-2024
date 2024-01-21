@@ -1,8 +1,10 @@
 package com.cornmuffin.prototype.ui.products
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,7 +47,8 @@ fun ProductsLayout(productUiStateFlow: StateFlow<ProductsUiState>) {
     when {
         productsUiState.isError -> Error(productsUiState.errorMessage)
         productsUiState.isLoading -> Loading()
-        else -> Products(productsUiState.products)
+        productsUiState.isRefreshing -> Refreshing(products = productsUiState.products)
+        else -> Products(products = productsUiState.products)
     }
 }
 
@@ -103,7 +106,7 @@ fun Products(
             onRefresh = {
                 isRefreshing = true
                 coroutineScope.launch {
-                    viewModel.initUiState()
+                    viewModel.reduce(ProductsViewModel.Action.Refresh)
                     isRefreshing = false
                 }
             }
@@ -123,6 +126,19 @@ fun Products(
             }
         }
     }
+}
+
+@Composable
+fun Refreshing(
+    products: List<Product>,
+    modifier: Modifier = Modifier,
+) {
+    Products(
+        products,
+        modifier
+            .fillMaxSize()
+            .background(color = Color.Green.copy(alpha = 0.1f))
+    )
 }
 
 @Composable

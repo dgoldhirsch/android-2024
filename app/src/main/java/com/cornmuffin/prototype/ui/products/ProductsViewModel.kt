@@ -29,32 +29,106 @@ class ProductsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProductsUiState())
     val uiState: StateFlow<ProductsUiState> = _uiState.asStateFlow()
 
-    init {
-        initUiState()
+    enum class State {
+        Uninitialized,
+        Error,
+        Loading,
+        Loaded,
+        Refreshing,
     }
 
-    fun initUiState() {
-        viewModelScope.launch {
-            when {
-                // Drive UI and prime cache from network call
-                cachedProducts.isEmpty() -> {
-                    println(">>>>> CACHE IS EMPTY: DRIVE UI FROM NETWORK")
+    sealed interface Action {
+        data object Load : Action
+        data class LoadFinished(val productsResponse: ProductsResponse): Action
+        data object Refresh : Action
+        data class RefreshFinished(val productsResponse: ProductsResponse): Action
+    }
+
+    private val productsStateMachine = ProductsStateMachine { action, state ->
+        when (state) {
+            State.Uninitialized -> when (action) {
+                is Action.Load -> {
                     becomeLoading()
-                    fetchFromNetwork { onFinishedLoading(it) }
-                    fetchFromNetwork { onFinishedUpdating(it) }
+
+                    viewModelScope.launch {
+                        fetchFromNetwork {
+                            reduce(Action.LoadFinished(it))
+                        }
+                    }
+
+                    State.Loading
                 }
 
-                // Display whatever is in cache, and update cache from network call
-                else -> {
-                    println(">>>>> CACHE IS FULL: REDUCE...")
-                    becomeSuccessfullyLoaded(cachedProducts)
-                    println(">>>>> KICK OFF NETWORK")
-                    fetchFromNetwork { onFinishedUpdating(it) }
-                    // Don't reduce with updated data.
-                    // If/when user refreshes the UI, they'll get the updated data from the cache
-                }
+                else -> state
             }
+
+            State.Loading -> when (action) {
+                is Action.LoadFinished -> {
+                    when (action.productsResponse) {
+                        is ProductsResponse.Error -> {
+                            becomeError(action.productsResponse.exception.message ?: "Bummer")
+                            State.Error
+                        }
+
+                        is ProductsResponse.Success -> {
+                            becomeSuccessfullyLoaded(action.productsResponse.data)
+                            State.Loaded
+                        }
+
+                        else -> state
+                    }
+                }
+
+                else -> state
+            }
+
+            State.Loaded -> when (action) {
+                is Action.Refresh -> {
+                    becomeRefreshing(cachedProducts) // TODO better modify existing composition without re-rendering products
+
+                    viewModelScope.launch {
+                        fetchFromNetwork {
+                            reduce(Action.RefreshFinished(it))
+                        }
+                    }
+
+                    State.Refreshing
+                }
+
+                else -> state
+            }
+
+            State.Refreshing -> when (action) {
+                is Action.RefreshFinished -> {
+                    when (action.productsResponse) {
+                        is ProductsResponse.Error -> {
+                            becomeError(action.productsResponse.exception.message ?: "Bummer")
+                            State.Error
+                        }
+
+                        is ProductsResponse.Success -> {
+                            becomeSuccessfullyLoaded(action.productsResponse.data)
+                            State.Loaded
+                        }
+
+                        else -> state
+                    }
+                }
+
+                else -> state
+
+            }
+            // No-op
+            else -> state
         }
+    }
+
+    init {
+        productsStateMachine.reduce(Action.Load)
+    }
+
+    internal fun reduce(action: Action) {
+        productsStateMachine.reduce(action)
     }
 
     private fun becomeError(message: String) {
@@ -75,6 +149,10 @@ class ProductsViewModel @Inject constructor(
         updateCacheUsing(products)
     }
 
+    private fun becomeRefreshing(products: ImmutableList<Product>) {
+        _uiState.update { it.asRefreshing() }
+    }
+
     private suspend fun fetchFromNetwork(onResponse: (ProductsResponse) -> Unit) {
         repository.products
             .flowOn(Dispatchers.IO)
@@ -82,28 +160,6 @@ class ProductsViewModel @Inject constructor(
                 emit(ProductsResponse.Error(it))
             }
             .collect(onResponse)
-    }
-
-    private fun onFinishedLoading(productsResponse: ProductsResponse) {
-        when (productsResponse) {
-            is ProductsResponse.Error -> becomeError(productsResponse.exception.message ?: "Bummer")
-            is ProductsResponse.Loading -> becomeLoading()
-            is ProductsResponse.Success -> becomeSuccessfullyLoaded(productsResponse.data)
-        }
-    }
-
-    private fun onFinishedUpdating(productsResponse: ProductsResponse) {
-        when (productsResponse) {
-            // TODO Error during update:  retry a few times, and/or toast a message that the network can't be reached
-            // and that the user should please try again later.
-            is ProductsResponse.Error -> println(">>>>> UPDATE Error")
-
-            // TODO Loading during update: ignore, but maybe only up to some reasonable timeout period
-            is ProductsResponse.Loading -> println(">>>>> UPDATE Loading")
-            is ProductsResponse.Success -> updateCacheUsing(productsResponse.data)
-            // Note that we do not update the UI state.  We've updated the cache, and the user
-            // will see that new data when/if they refresh the screen.
-        }
     }
 
     private fun updateCacheUsing(products: ImmutableList<Product>) {
