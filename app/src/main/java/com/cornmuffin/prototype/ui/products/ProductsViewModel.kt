@@ -153,7 +153,7 @@ class ProductsViewModel @Inject constructor(
     private fun listenToOrbitFlows() {
         viewModelScope.launch {
             container.stateFlow.collect {
-                _uiState.value = it
+                _uiState.value = it // forward product UI state to ProductsLayout composable (and any other listeners)
             }
         }
 

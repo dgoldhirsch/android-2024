@@ -28,10 +28,8 @@ internal class ProductsNetworkDataSource @Inject constructor() {
         if (body.isNullOrEmpty()) {
             ProductsResponse.Error(NoProductsException)
         } else {
-            val chunkRange = cursor..min(cursor + CHUNK_SIZE, body.size - 1)
-            println(">>>>> NETWORK CHUNK $chunkRange")
-
             // Emulate getting different product beans each request
+            val chunkRange = cursor..min(cursor + CHUNK_SIZE, body.size - 1)
             val chunkOfProductBeans = body.slice(chunkRange)
             cursor = (cursor + chunkRange.last + 1) % body.size
             ProductsResponse.Success(data = chunkOfProductBeans.map { it.parse() }.toPersistentList())
