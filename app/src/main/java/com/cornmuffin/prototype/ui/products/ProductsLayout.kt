@@ -43,12 +43,12 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ProductsLayout() {
-    val productsUiState by hiltViewModel<ProductsViewModel>().container.stateFlow.collectAsState()
-    when (productsUiState.state) {
-        ProductsUiState.State.ERROR -> Error(productsUiState.errorMessage)
-        ProductsUiState.State.LOADING -> Loading()
-        ProductsUiState.State.REFRESHING -> Refreshing(products = productsUiState.products)
-        else -> Products(products = productsUiState.products)
+    val productsViewModelState by hiltViewModel<ProductsViewModel>().stateFlow().collectAsState()
+    when (productsViewModelState.state) {
+        ProductsViewModelState.State.ERROR -> Error(productsViewModelState.errorMessage)
+        ProductsViewModelState.State.LOADING -> Loading()
+        ProductsViewModelState.State.REFRESHING -> Refreshing(products = productsViewModelState.products)
+        else -> Products(products = productsViewModelState.products)
     }
 }
 
@@ -70,7 +70,7 @@ fun Error(message: String = stringResource(R.string.no_details)) {
                 text = stringResource(id = R.string.error, message),
             )
 
-            Button(onClick = { viewModel.advanceProductsStateMachine(ProductsViewModel.PsmAction.Retry) }) {
+            Button(onClick = { viewModel.reduceViewModel(ProductsViewModel.Action.Retry) }) {
                 Text(
                     textAlign = TextAlign.Center,
                     text = stringResource(id = R.string.retry)
@@ -120,7 +120,7 @@ fun Products(
             onRefresh = {
                 isRefreshing = true
                 coroutineScope.launch {
-                    viewModel.advanceProductsStateMachine(ProductsViewModel.PsmAction.Refresh)
+                    viewModel.reduceViewModel(ProductsViewModel.Action.Refresh)
                     isRefreshing = false
                 }
             }

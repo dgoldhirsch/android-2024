@@ -9,9 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
-import org.orbitmvi.orbit.Container
-import org.orbitmvi.orbit.ContainerHost
-import org.orbitmvi.orbit.container
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
 import org.orbitmvi.orbit.syntax.simple.reduce
@@ -20,28 +17,27 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductsViewModel @Inject constructor(
     private val repository: ProductsRepository,
-) : ViewModel(), ContainerHost<ProductsUiState, ProductsSideEffect> {
+) : ViewModel() {
 
-    override val container: Container<ProductsUiState, ProductsSideEffect> = viewModelScope.container(
-        ProductsUiState()
-    )
+    private val container = ProductsContainer(viewModelScope)
 
-    // Action inputs to the ProductsStateMachine, not to be confused with UI events nor user actions.
-    sealed interface PsmAction {
-        data object Load : PsmAction
-        data class ProcessLoadResponse(val productsResponse: ProductsResponse) : PsmAction
-        data object Refresh : PsmAction
-        data class ProcessRefreshResponse(val productsResponse: ProductsResponse) : PsmAction
-        data object Retry : PsmAction
+    // Action inputs to the state machine, not to be confused with UI user actions.
+    sealed interface Action {
+        data object Load : Action
+        data class ProcessLoadResponse(val productsResponse: ProductsResponse) : Action
+        data object Refresh : Action
+        data class ProcessRefreshResponse(val productsResponse: ProductsResponse) : Action
+        data object Retry : Action
     }
 
-    private val productsPsmStateMachine = ProductsStateMachine {action ->
+    // Controls the view model based on current Orbit container state and a given action (event).
+    private val stateMachine: (Action) -> Unit = { action ->
         when (container.stateFlow.value.state) {
-            ProductsUiState.State.UNINITIALIZED, // Default state when state machine is constructed
-            ProductsUiState.State.ERROR -> when (action) {
-                is PsmAction.Load,
-                is PsmAction.Retry -> {
-                    intent {
+            ProductsViewModelState.State.UNINITIALIZED, // Default state when state machine is constructed
+            ProductsViewModelState.State.ERROR -> when (action) {
+                is Action.Load,
+                is Action.Retry -> {
+                    container.intent {
                         postSideEffect(ProductsSideEffect.FetchForLoad)
                         reduce { this.state.asLoading() }
                     }
@@ -49,17 +45,17 @@ class ProductsViewModel @Inject constructor(
                 else -> { }
             }
 
-            ProductsUiState.State.LOADING -> when (action) {
-                is PsmAction.ProcessLoadResponse -> {
+            ProductsViewModelState.State.LOADING -> when (action) {
+                is Action.ProcessLoadResponse -> {
                     when (action.productsResponse) {
                         is ProductsResponse.Error -> {
-                            intent {
+                            container.intent {
                                 reduce { this.state.asError(action.productsResponse.exception.message ?: "Bummer") }
                             }
                         }
 
                         is ProductsResponse.Success -> {
-                            intent {
+                            container.intent {
                                 reduce { this.state.asSuccess(action.productsResponse.data) }
                             }
                         }
@@ -70,9 +66,9 @@ class ProductsViewModel @Inject constructor(
                 else -> { }
             }
 
-            ProductsUiState.State.SUCCESSFUL -> when (action) {
-                is PsmAction.Refresh -> {
-                    intent {
+            ProductsViewModelState.State.SUCCESSFUL -> when (action) {
+                is Action.Refresh -> {
+                    container.intent {
                         postSideEffect(ProductsSideEffect.Refresh)
                         reduce { this.state.asRefreshing() }
                     }
@@ -80,11 +76,11 @@ class ProductsViewModel @Inject constructor(
                 else -> { }
             }
 
-            ProductsUiState.State.REFRESHING -> when (action) {
-                is PsmAction.ProcessRefreshResponse -> {
+            ProductsViewModelState.State.REFRESHING -> when (action) {
+                is Action.ProcessRefreshResponse -> {
                     when (action.productsResponse) {
                         is ProductsResponse.Error -> {
-                            intent {
+                            container.intent {
                                 reduce {
                                     this.state.asError(action.productsResponse.exception.message ?: "Bummer")
                                 }
@@ -92,7 +88,7 @@ class ProductsViewModel @Inject constructor(
                         }
 
                         is ProductsResponse.Success -> {
-                            intent {
+                            container.intent {
                                 reduce { this.state.asSuccess(action.productsResponse.data) }
                             }
                         }
@@ -107,12 +103,21 @@ class ProductsViewModel @Inject constructor(
 
     init {
         listenForSideEffects()
-        advanceProductsStateMachine(PsmAction.Load)
+        reduceViewModel(Action.Load)
     }
 
-    internal fun advanceProductsStateMachine(action: PsmAction) {
-        productsPsmStateMachine.reduce(action)
+    /**
+     * Allow UI and other callers to advance our state based on an action.
+     */
+    internal fun reduceViewModel(action: Action) {
+        stateMachine(action)
     }
+
+    /**
+     * Allow UI and other callers to listen to our state flow without having to understand
+     * that our state is managed by an Orbit container.
+     */
+    internal fun stateFlow() = container.stateFlow
 
     private suspend fun fetchFromNetwork() = repository.products
         .flowOn(Dispatchers.IO)
@@ -126,13 +131,13 @@ class ProductsViewModel @Inject constructor(
                 when (productsSideEffect) {
                     ProductsSideEffect.FetchForLoad -> viewModelScope.launch {
                         fetchFromNetwork().collect {
-                            advanceProductsStateMachine(PsmAction.ProcessLoadResponse(it))
+                            reduceViewModel(Action.ProcessLoadResponse(it))
                         }
                     }
 
                     ProductsSideEffect.Refresh -> viewModelScope.launch {
                         fetchFromNetwork().collect {
-                            advanceProductsStateMachine(PsmAction.ProcessRefreshResponse(it))
+                            reduceViewModel(Action.ProcessRefreshResponse(it))
                         }
                     }
                 }
