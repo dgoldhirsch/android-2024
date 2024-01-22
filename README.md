@@ -11,8 +11,6 @@ A sample app using a reasonable tech stack containing the following elements:
   - Finite State Machine controlling the state of the view model
   - Orbit MVI used by the F.S.M. to dispatch UI state and side effects
 * Hilt
-* Devops
-  - Github Action CI
 
 ## The App
 
