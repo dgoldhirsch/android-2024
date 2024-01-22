@@ -3,6 +3,7 @@
 A sample app using a reasonable tech stack containing the following elements:
 
 * Unidirectional Jetpack Architecture:  MVI/FSM, Navigate, Compose, Data (Repositories and Data Sources)
+* Material Design 3
 * Compose Features
   - Pull-To-Refresh
 * Flow and Coroutines
