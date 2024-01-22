@@ -26,17 +26,7 @@ class ProductsViewModel @Inject constructor(
         ProductsUiState()
     )
 
-    // State of ProductsStateMachine, not to be confused with the Compose State interface,
-    // nor the State of the Orbit Container.
-    enum class PsmState {
-        Uninitialized,
-        Error,
-        Loaded,
-        Loading,
-        Refreshing,
-    }
-
-    // Events of the ProductsStateMachine, not to be confused with UI events nor user actions.
+    // Action inputs to the ProductsStateMachine, not to be confused with UI events nor user actions.
     sealed interface PsmAction {
         data object Load : PsmAction
         data class ProcessLoadResponse(val productsResponse: ProductsResponse) : PsmAction
@@ -45,89 +35,83 @@ class ProductsViewModel @Inject constructor(
         data object Retry : PsmAction
     }
 
-    private val productsPsmStateMachine = ProductsStateMachine { event, state ->
-        when (state) {
-            PsmState.Uninitialized, // Default state when state machine is constructed
-            PsmState.Error -> when (event) {
+    private val productsPsmStateMachine = ProductsStateMachine {action ->
+        when (container.stateFlow.value.state) {
+            ProductsUiState.State.UNINITIALIZED, // Default state when state machine is constructed
+            ProductsUiState.State.ERROR -> when (action) {
                 is PsmAction.Load,
                 is PsmAction.Retry -> {
                     intent {
                         postSideEffect(ProductsSideEffect.FetchForLoad)
                         reduce { this.state.asLoading() }
                     }
-                    PsmState.Loading
                 }
-                else -> state
+                else -> { }
             }
 
-            PsmState.Loading -> when (event) {
+            ProductsUiState.State.LOADING -> when (action) {
                 is PsmAction.ProcessLoadResponse -> {
-                    when (event.productsResponse) {
+                    when (action.productsResponse) {
                         is ProductsResponse.Error -> {
                             intent {
-                                reduce { this.state.asError(event.productsResponse.exception.message ?: "Bummer") }
+                                reduce { this.state.asError(action.productsResponse.exception.message ?: "Bummer") }
                             }
-                            PsmState.Error
                         }
 
                         is ProductsResponse.Success -> {
                             intent {
-                                reduce { this.state.asSuccess(event.productsResponse.data) }
+                                reduce { this.state.asSuccess(action.productsResponse.data) }
                             }
-                            PsmState.Loaded
                         }
 
-                        else -> state
+                        else -> { }
                     }
                 }
-                else -> state
+                else -> { }
             }
 
-            PsmState.Loaded -> when (event) {
+            ProductsUiState.State.SUCCESSFUL -> when (action) {
                 is PsmAction.Refresh -> {
                     intent {
                         postSideEffect(ProductsSideEffect.Refresh)
                         reduce { this.state.asRefreshing() }
                     }
-                    PsmState.Refreshing
                 }
-                else -> state
+                else -> { }
             }
 
-            PsmState.Refreshing -> when (event) {
+            ProductsUiState.State.REFRESHING -> when (action) {
                 is PsmAction.ProcessRefreshResponse -> {
-                    when (event.productsResponse) {
+                    when (action.productsResponse) {
                         is ProductsResponse.Error -> {
                             intent {
                                 reduce {
-                                    this.state.asError(event.productsResponse.exception.message ?: "Bummer")
+                                    this.state.asError(action.productsResponse.exception.message ?: "Bummer")
                                 }
                             }
-                            PsmState.Error
                         }
 
                         is ProductsResponse.Success -> {
                             intent {
-                                reduce { this.state.asSuccess(event.productsResponse.data) }
+                                reduce { this.state.asSuccess(action.productsResponse.data) }
                             }
-                            PsmState.Loaded
                         }
 
-                        else -> state
+                        else -> { }
                     }
                 }
-                else -> state
+                else -> { }
             }
         }
     }
 
     init {
         listenForSideEffects()
-        productsPsmStateMachine.advance(PsmAction.Load)
+        advanceProductsStateMachine(PsmAction.Load)
     }
 
-    internal fun advanceProductsStateMachine(event: PsmAction) {
-        productsPsmStateMachine.advance(event)
+    internal fun advanceProductsStateMachine(action: PsmAction) {
+        productsPsmStateMachine.reduce(action)
     }
 
     private suspend fun fetchFromNetwork() = repository.products

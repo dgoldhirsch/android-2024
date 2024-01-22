@@ -5,38 +5,28 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class ProductsUiState(
+    val state: State = State.UNINITIALIZED,
     val errorMessage: String = "",
-    val isError: Boolean = false,
-    val isLoading: Boolean = false,
-    val isRefreshing: Boolean = false,
     val products: ImmutableList<Product> = persistentListOf(),
 ) {
-    fun asError(message: String): ProductsUiState = copy(
+    fun asError(message: String) = copy(
+        state = State.ERROR,
         errorMessage = message,
-        isError = true,
-        isLoading = false,
-        isRefreshing = false,
     )
 
-    fun asLoading(): ProductsUiState = copy(
-        errorMessage = "",
-        isError = false,
-        isLoading = true,
-        isRefreshing = false,
-    )
+    fun asLoading() = ProductsUiState(state = State.LOADING)
+    fun asRefreshing() = copy(state = State.REFRESHING)
 
-    fun asRefreshing(): ProductsUiState = copy(
-        errorMessage = "",
-        isError = false,
-        isLoading = false,
-        isRefreshing = true,
-    )
-
-    fun asSuccess(products: ImmutableList<Product>): ProductsUiState = copy(
-        errorMessage = "",
-        isError = false,
-        isLoading = false,
-        isRefreshing = false,
+    fun asSuccess(products: ImmutableList<Product>) = ProductsUiState(
+        state = State.SUCCESSFUL,
         products = products,
     )
+
+    enum class State {
+        ERROR,
+        LOADING,
+        REFRESHING,
+        SUCCESSFUL,
+        UNINITIALIZED,
+    }
 }

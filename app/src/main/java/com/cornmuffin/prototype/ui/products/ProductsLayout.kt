@@ -44,10 +44,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProductsLayout() {
     val productsUiState by hiltViewModel<ProductsViewModel>().container.stateFlow.collectAsState()
-    when {
-        productsUiState.isError -> Error(productsUiState.errorMessage)
-        productsUiState.isLoading -> Loading()
-        productsUiState.isRefreshing -> Refreshing(products = productsUiState.products)
+    when (productsUiState.state) {
+        ProductsUiState.State.ERROR -> Error(productsUiState.errorMessage)
+        ProductsUiState.State.LOADING -> Loading()
+        ProductsUiState.State.REFRESHING -> Refreshing(products = productsUiState.products)
         else -> Products(products = productsUiState.products)
     }
 }
