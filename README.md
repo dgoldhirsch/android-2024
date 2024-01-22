@@ -2,20 +2,14 @@
 
 A sample app using a reasonable tech stack containing the following elements:
 
-* Jetpack Compose
-* Jetpack Navigation
+* Unidirectional Jetpack Architecture:  MVI/FSM, Navigate, Compose, Data (Repositories and Data Sources)
+* Compose Features
+  - Pull-To-Refresh
 * Flow and Coroutines
-* Uni-directional Architecture based on State Flow
-* Data Layer = Repository + Data Source Architecture
+* Finite State Machine-Driven View Models
+  - Finite State Machine controlling the state of the view model
+  - Orbit MVI used by the F.S.M. to dispatch UI state and side effects
 * Hilt
-
-## Architecture
-This is a unidirectional (reactive) app implemented with a view model that maintains a _ui state_ object that is collected-as-state by the Compose main layout.
-There are really two state machines in this app:  the true state of the application is maintained within the view model;  and, a subset of that--the _ui state_--is monitored by the Compose layout.
-
-The repository is modelled to return a _response_ that if successful contains safe data models that be used by the view model to drive the state of the app.  The repository hides all of the mapping and null handling.
-
-Currently the app consists of a single page populated from a single repository, so, it's all very simple.
 
 ## The App
 
