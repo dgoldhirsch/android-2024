@@ -10,13 +10,11 @@ data class ProductsUiState(
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val products: ImmutableList<Product> = persistentListOf(),
-    val retryNumber: Int = 0,
 ) {
-    fun asError(retryNumber: Int, errorMessage: String): ProductsUiState = copy(
-        errorMessage = errorMessage,
+    fun asError(message: String): ProductsUiState = copy(
+        errorMessage = message,
         isError = true,
         isLoading = false,
-        retryNumber = retryNumber,
         isRefreshing = false,
     )
 

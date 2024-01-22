@@ -107,6 +107,10 @@ dependencies {
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
+
+    // OrbitMVI
+    val orbitVersion = "6.1.0"
+    implementation("org.orbit-mvi:orbit-core:$orbitVersion")
 }
 
 // Allow references to generated code

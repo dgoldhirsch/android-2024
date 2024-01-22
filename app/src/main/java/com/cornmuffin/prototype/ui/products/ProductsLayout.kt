@@ -71,7 +71,7 @@ fun Error(message: String = stringResource(R.string.no_details)) {
                 text = stringResource(id = R.string.error, message),
             )
 
-            Button(onClick = { viewModel.reduce(ProductsViewModel.Action.Retry) }) {
+            Button(onClick = { viewModel.advanceProductsStateMachine(ProductsViewModel.PsmEvent.Retry) }) {
                 Text(
                     textAlign = TextAlign.Center,
                     text = stringResource(id = R.string.retry)
@@ -121,7 +121,7 @@ fun Products(
             onRefresh = {
                 isRefreshing = true
                 coroutineScope.launch {
-                    viewModel.reduce(ProductsViewModel.Action.Refresh)
+                    viewModel.advanceProductsStateMachine(ProductsViewModel.PsmEvent.Refresh)
                     isRefreshing = false
                 }
             }
