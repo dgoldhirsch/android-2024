@@ -2,15 +2,10 @@ package com.cornmuffin.prototype.ui.products
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cornmuffin.prototype.data.products.Product
 import com.cornmuffin.prototype.data.products.ProductsRepository
 import com.cornmuffin.prototype.data.products.ProductsResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
@@ -26,12 +21,6 @@ import javax.inject.Inject
 class ProductsViewModel @Inject constructor(
     private val repository: ProductsRepository,
 ) : ViewModel(), ContainerHost<ProductsUiState, ProductsSideEffect> {
-    private val _uiState = MutableStateFlow(ProductsUiState())
-
-    /**
-     * This drives the entire UI via [ProductsLayout]
-     */
-    val uiState: StateFlow<ProductsUiState> = _uiState.asStateFlow()
 
     override val container: Container<ProductsUiState, ProductsSideEffect> = viewModelScope.container(
         ProductsUiState()
@@ -48,23 +37,23 @@ class ProductsViewModel @Inject constructor(
     }
 
     // Events of the ProductsStateMachine, not to be confused with UI events nor user actions.
-    sealed interface PsmEvent {
-        data object Load : PsmEvent
-        data class LoadFinished(val productsResponse: ProductsResponse) : PsmEvent
-        data object Refresh : PsmEvent
-        data class RefreshFinished(val productsResponse: ProductsResponse) : PsmEvent
-        data object Retry : PsmEvent
+    sealed interface PsmAction {
+        data object Load : PsmAction
+        data class ProcessLoadResponse(val productsResponse: ProductsResponse) : PsmAction
+        data object Refresh : PsmAction
+        data class ProcessRefreshResponse(val productsResponse: ProductsResponse) : PsmAction
+        data object Retry : PsmAction
     }
 
     private val productsPsmStateMachine = ProductsStateMachine { event, state ->
         when (state) {
             PsmState.Uninitialized, // Default state when state machine is constructed
             PsmState.Error -> when (event) {
-                is PsmEvent.Load,
-                is PsmEvent.Retry -> {
+                is PsmAction.Load,
+                is PsmAction.Retry -> {
                     intent {
                         postSideEffect(ProductsSideEffect.FetchForLoad)
-                        reduce { uiStateAsLoading() }
+                        reduce { this.state.asLoading() }
                     }
                     PsmState.Loading
                 }
@@ -72,18 +61,18 @@ class ProductsViewModel @Inject constructor(
             }
 
             PsmState.Loading -> when (event) {
-                is PsmEvent.LoadFinished -> {
+                is PsmAction.ProcessLoadResponse -> {
                     when (event.productsResponse) {
                         is ProductsResponse.Error -> {
                             intent {
-                                reduce { uiStateAsError(event.productsResponse.exception.message ?: "Bummer") }
+                                reduce { this.state.asError(event.productsResponse.exception.message ?: "Bummer") }
                             }
                             PsmState.Error
                         }
 
                         is ProductsResponse.Success -> {
                             intent {
-                                reduce { uiStateAsSuccessfullyLoaded(event.productsResponse.data) }
+                                reduce { this.state.asSuccess(event.productsResponse.data) }
                             }
                             PsmState.Loaded
                         }
@@ -95,10 +84,10 @@ class ProductsViewModel @Inject constructor(
             }
 
             PsmState.Loaded -> when (event) {
-                is PsmEvent.Refresh -> {
+                is PsmAction.Refresh -> {
                     intent {
                         postSideEffect(ProductsSideEffect.Refresh)
-                        reduce { uiStateAsRefreshing() }
+                        reduce { this.state.asRefreshing() }
                     }
                     PsmState.Refreshing
                 }
@@ -106,18 +95,20 @@ class ProductsViewModel @Inject constructor(
             }
 
             PsmState.Refreshing -> when (event) {
-                is PsmEvent.RefreshFinished -> {
+                is PsmAction.ProcessRefreshResponse -> {
                     when (event.productsResponse) {
                         is ProductsResponse.Error -> {
                             intent {
-                                reduce { uiStateAsError(event.productsResponse.exception.message ?: "Bummer") }
+                                reduce {
+                                    this.state.asError(event.productsResponse.exception.message ?: "Bummer")
+                                }
                             }
                             PsmState.Error
                         }
 
                         is ProductsResponse.Success -> {
                             intent {
-                                reduce { uiStateAsSuccessfullyLoaded(event.productsResponse.data) }
+                                reduce { this.state.asSuccess(event.productsResponse.data) }
                             }
                             PsmState.Loaded
                         }
@@ -131,11 +122,11 @@ class ProductsViewModel @Inject constructor(
     }
 
     init {
-        listenToOrbitFlows()
-        productsPsmStateMachine.advance(PsmEvent.Load)
+        listenForSideEffects()
+        productsPsmStateMachine.advance(PsmAction.Load)
     }
 
-    internal fun advanceProductsStateMachine(event: PsmEvent) {
+    internal fun advanceProductsStateMachine(event: PsmAction) {
         productsPsmStateMachine.advance(event)
     }
 
@@ -145,30 +136,19 @@ class ProductsViewModel @Inject constructor(
             emit(ProductsResponse.Error(it))
         }
 
-    private fun uiStateAsLoading() = uiState.value.asLoading()
-    private fun uiStateAsError(message: String) = uiState.value.asError(message = message)
-    private fun uiStateAsRefreshing() = uiState.value.asRefreshing()
-    private fun uiStateAsSuccessfullyLoaded(products: ImmutableList<Product>) = uiState.value.asSuccess(products = products)
-
-    private fun listenToOrbitFlows() {
-        viewModelScope.launch {
-            container.stateFlow.collect {
-                _uiState.value = it // forward product UI state to ProductsLayout composable (and any other listeners)
-            }
-        }
-
+    private fun listenForSideEffects() {
         viewModelScope.launch {
             container.sideEffectFlow.collect { productsSideEffect ->
                 when (productsSideEffect) {
                     ProductsSideEffect.FetchForLoad -> viewModelScope.launch {
                         fetchFromNetwork().collect {
-                            advanceProductsStateMachine(PsmEvent.LoadFinished(it))
+                            advanceProductsStateMachine(PsmAction.ProcessLoadResponse(it))
                         }
                     }
 
                     ProductsSideEffect.Refresh -> viewModelScope.launch {
                         fetchFromNetwork().collect {
-                            advanceProductsStateMachine(PsmEvent.RefreshFinished(it))
+                            advanceProductsStateMachine(PsmAction.ProcessRefreshResponse(it))
                         }
                     }
                 }

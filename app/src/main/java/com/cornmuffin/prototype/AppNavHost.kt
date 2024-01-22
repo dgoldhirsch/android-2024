@@ -26,8 +26,6 @@ fun AppNavHost(
         navController = navController,
         startDestination = "products"
     ) {
-        composable("products") {
-            ProductsLayout(productUiStateFlow = hiltViewModel<ProductsViewModel>().uiState)
-        }
+        composable("products") { ProductsLayout() }
     }
 }

@@ -34,17 +34,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
 import com.cornmuffin.prototype.R
 import com.cornmuffin.prototype.data.products.Product
-import com.cornmuffin.prototype.roundToNearestHalf
+import com.cornmuffin.prototype.util.roundToNearestHalf
 import eu.bambooapps.material3.pullrefresh.PullRefreshIndicator
 import eu.bambooapps.material3.pullrefresh.PullRefreshIndicatorDefaults
 import eu.bambooapps.material3.pullrefresh.pullRefresh
 import eu.bambooapps.material3.pullrefresh.rememberPullRefreshState
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @Composable
-fun ProductsLayout(productUiStateFlow: StateFlow<ProductsUiState>) {
-    val productsUiState by productUiStateFlow.collectAsState()
+fun ProductsLayout() {
+    val productsUiState by hiltViewModel<ProductsViewModel>().container.stateFlow.collectAsState()
     when {
         productsUiState.isError -> Error(productsUiState.errorMessage)
         productsUiState.isLoading -> Loading()
@@ -71,7 +70,7 @@ fun Error(message: String = stringResource(R.string.no_details)) {
                 text = stringResource(id = R.string.error, message),
             )
 
-            Button(onClick = { viewModel.advanceProductsStateMachine(ProductsViewModel.PsmEvent.Retry) }) {
+            Button(onClick = { viewModel.advanceProductsStateMachine(ProductsViewModel.PsmAction.Retry) }) {
                 Text(
                     textAlign = TextAlign.Center,
                     text = stringResource(id = R.string.retry)
@@ -121,7 +120,7 @@ fun Products(
             onRefresh = {
                 isRefreshing = true
                 coroutineScope.launch {
-                    viewModel.advanceProductsStateMachine(ProductsViewModel.PsmEvent.Refresh)
+                    viewModel.advanceProductsStateMachine(ProductsViewModel.PsmAction.Refresh)
                     isRefreshing = false
                 }
             }

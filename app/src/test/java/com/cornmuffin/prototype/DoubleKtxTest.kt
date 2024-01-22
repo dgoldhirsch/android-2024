@@ -1,5 +1,6 @@
 package com.cornmuffin.prototype
 
+import com.cornmuffin.prototype.util.roundToNearestHalf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
