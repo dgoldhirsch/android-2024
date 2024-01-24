@@ -17,7 +17,7 @@ interface ProductDao {
 
     // For this database containing this one table, the following is fine.
     // As noted in https://betterprogramming.pub/upserting-in-room-8207a100db53,
-    // however, if there are other tables in which the products were part of a
+    // if there were other tables in which the products were part of a
     // potentially cascading deletion, we'd much rather use UPSERT than
     // to delete/insert.
     @Insert(onConflict = OnConflictStrategy.REPLACE)

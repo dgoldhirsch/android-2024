@@ -1,7 +1,6 @@
 package com.cornmuffin.prototype.data.room
 
 import android.content.Context
-import androidx.room.Room
 import androidx.room.Room.databaseBuilder
 import dagger.Module
 import dagger.Provides
