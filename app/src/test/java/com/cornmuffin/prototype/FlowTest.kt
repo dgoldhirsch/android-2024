@@ -1,10 +1,18 @@
 package com.cornmuffin.prototype
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flattenMerge
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -16,6 +24,34 @@ import kotlin.test.Test
  * This is a kind of test bed for understanding flows.
  */
 class FlowTest {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun collectingMultipleEmissions() = runTest {
+        val myAbcFlow = flow {
+            ('A'..'E').forEach {
+                delay(25)
+                emit(it)
+            }
+        }
+
+        val my123Flow = flow {
+            (1..5).forEach {
+                delay(50)
+                emit(it)
+            }
+        }
+
+        flowOf(myAbcFlow, my123Flow).flattenMerge()
+            .collect {
+                println("==> $it")
+            }
+    }
+
+    private suspend fun <T> Flow<T>.flowMerge(other: Flow<T>): Flow<T> = flow {
+        collect { emit(it) }
+        other.collect { emit(it) }
+    }
+
     @Test
     fun simpleFlow() = runTest {
         val flow = flowOf(

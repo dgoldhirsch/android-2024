@@ -2,9 +2,13 @@ package com.cornmuffin.prototype.ui.products
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cornmuffin.prototype.data.products.Product
 import com.cornmuffin.prototype.data.products.ProductsRepository
 import com.cornmuffin.prototype.data.products.ProductsResponse
+import com.cornmuffin.prototype.data.room.Database
+import com.cornmuffin.prototype.data.room.products.ProductEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
@@ -17,6 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductsViewModel @Inject constructor(
     private val repository: ProductsRepository,
+    private val database: Database,
 ) : ViewModel() {
 
     private val container = ProductsContainer(viewModelScope)
@@ -56,6 +61,7 @@ class ProductsViewModel @Inject constructor(
 
                         is ProductsResponse.Success -> {
                             container.intent {
+                                postSideEffect(ProductsSideEffect.PrimeCache(action.productsResponse.data))
                                 reduce { this.state.asSuccess(action.productsResponse.data) }
                             }
                         }
@@ -89,6 +95,7 @@ class ProductsViewModel @Inject constructor(
 
                         is ProductsResponse.Success -> {
                             container.intent {
+                                postSideEffect(ProductsSideEffect.PrimeCache(action.productsResponse.data))
                                 reduce { this.state.asSuccess(action.productsResponse.data) }
                             }
                         }
@@ -129,13 +136,17 @@ class ProductsViewModel @Inject constructor(
         viewModelScope.launch {
             container.sideEffectFlow.collect { productsSideEffect ->
                 when (productsSideEffect) {
-                    ProductsSideEffect.FetchForLoad -> viewModelScope.launch {
+                    is ProductsSideEffect.FetchForLoad -> viewModelScope.launch {
                         fetchFromNetwork().collect {
                             reduceViewModel(Action.ProcessLoadResponse(it))
                         }
                     }
 
-                    ProductsSideEffect.Refresh -> viewModelScope.launch {
+                    is ProductsSideEffect.PrimeCache -> {
+                        viewModelScope.launchDatabaseExperiment(productsSideEffect.products)
+                    }
+
+                    is ProductsSideEffect.Refresh -> viewModelScope.launch {
                         fetchFromNetwork().collect {
                             reduceViewModel(Action.ProcessRefreshResponse(it))
                         }
@@ -143,5 +154,20 @@ class ProductsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun CoroutineScope.launchDatabaseExperiment(products: List<Product>) {
+        launch(Dispatchers.IO) {
+            val productDao = database.getProductDao()
+            productDao.deleteAll()
+            val productEntities = products.map { ProductEntity.fromProduct(it) }
+            productDao.insertAll(productEntities)
+
+            val savedProductEntities = productDao.getAll()
+            savedProductEntities.forEach {
+                println(">>>>> ${it.title}")
+            }
+        }
+
     }
 }

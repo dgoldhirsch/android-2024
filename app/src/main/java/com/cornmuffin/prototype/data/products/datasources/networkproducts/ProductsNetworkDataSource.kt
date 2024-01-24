@@ -1,4 +1,4 @@
-package com.cornmuffin.prototype.data.products.datasources
+package com.cornmuffin.prototype.data.products.datasources.networkproducts
 
 import com.cornmuffin.prototype.data.products.NoProductsException
 import com.cornmuffin.prototype.data.products.ProductsResponse
