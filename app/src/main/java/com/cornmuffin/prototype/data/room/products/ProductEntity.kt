@@ -14,6 +14,14 @@ data class ProductEntity(
     @ColumnInfo(name = "count") val count: Int,
     @ColumnInfo(name = "image") val image: String?,
 ) {
+    fun toProduct() = Product(
+        title = title,
+        description = description,
+        rating = rating,
+        count = count,
+        image = image,
+    )
+
     companion object {
         fun fromProduct(product: Product) = ProductEntity(
             pid = product.hashCode(),

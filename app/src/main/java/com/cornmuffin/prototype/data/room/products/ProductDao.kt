@@ -5,12 +5,15 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.cornmuffin.prototype.data.products.Product
 
 @Dao
 interface ProductDao {
+
+    @Query("DELETE FROM productEntity")
+    fun clear()
+
     @Query("SELECT * from productEntity")
-    fun getAll(): List<Product>
+    fun getAll(): List<ProductEntity>
 
     @Query("SELECT * from productEntity WHERE pid IN (:pids)")
     fun loadAllByIds(pids: IntArray): List<ProductEntity>
@@ -25,7 +28,4 @@ interface ProductDao {
 
     @Delete
     fun delete(product: ProductEntity)
-
-    @Query("DELETE FROM productEntity")
-    fun deleteAll()
 }

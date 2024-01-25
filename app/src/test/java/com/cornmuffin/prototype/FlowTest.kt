@@ -18,12 +18,23 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import kotlin.test.Test
 
 /**
  * This is a kind of test bed for understanding flows.
  */
 class FlowTest {
+
+    @Test
+    fun dateTimeTest() {
+        val zdt = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault())
+
+        println("=> $zdt")
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun collectingMultipleEmissions() = runTest {
