@@ -1,13 +1,18 @@
 # 2024 Android Scaffold App
 
-A sample app demonstrating basic competence in the following elements of the tech stack for a modern Android application:
+A sample app demonstrating basic competence in the Android technology stack:
 
 * Unidirectional Jetpack Architecture:
   - Navigate
   - Compose
   - Data Layer Architecture (Repositories and Data Sources)
+  - State Flow
+* Compose
+  - Previews
+  - Progress spinner
+  - Pull-refresh indicator
 * OrbitMVI Framework
-* Flows and Coroutines
+* Coroutines/Flows
 * Coin
 * Hilt
 * Room
