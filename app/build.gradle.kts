@@ -92,6 +92,7 @@ dependencies {
 
     val navVersion = "2.7.6"
     implementation("androidx.navigation:navigation-compose:$navVersion")
+    androidTestImplementation("androidx.navigation:navigation-testing:$navVersion")
 
     // https://dev.to/andreym/how-to-do-a-material-3-pull-refresh-15b0
     implementation("eu.bambooapps:compose-material3-pullrefresh:1.0.0")

@@ -26,6 +26,6 @@ fun AppNavHost(
         navController = navController,
         startDestination = "products"
     ) {
-        composable("products") { ProductsLayout() }
+        composable(Navigator.NavTarget.Products.name) { ProductsLayout() }
     }
 }

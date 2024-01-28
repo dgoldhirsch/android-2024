@@ -1,8 +1,6 @@
 package com.cornmuffin.prototype
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,28 +10,17 @@ import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import kotlin.test.Test
 
 /**
  * This is a kind of test bed for understanding flows.
  */
 class FlowTest {
-
-    @Test
-    fun dateTimeTest() {
-        val zdt = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault())
-
-        println("=> $zdt")
-    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test

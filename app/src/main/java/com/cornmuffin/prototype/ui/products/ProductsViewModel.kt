@@ -18,7 +18,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductsViewModel @Inject constructor(
     private val repository: ProductsRepository,
-    private val database: Database,
 ) : ViewModel() {
 
     private val container = ProductsContainer(viewModelScope)
