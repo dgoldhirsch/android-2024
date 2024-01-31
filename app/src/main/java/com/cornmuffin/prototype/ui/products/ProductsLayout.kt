@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
+import com.cornmuffin.prototype.Navigator
 import com.cornmuffin.prototype.R
 import com.cornmuffin.prototype.data.products.Product
 import com.cornmuffin.prototype.util.roundToNearestHalf
@@ -138,6 +139,12 @@ fun Products(
                 Product(it)
                 Divider()
             }
+        }
+
+        Button(
+            onClick = { viewModel.reduceViewModel(ProductsViewModel.Action.NavigateTo(Navigator.NavTarget.Settings)) }
+        ) {
+            Text("Settings...")
         }
     }
 }

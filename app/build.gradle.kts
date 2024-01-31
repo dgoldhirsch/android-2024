@@ -14,6 +14,10 @@ kotlin {
     jvmToolchain(17)
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 android {
     namespace = "com.cornmuffin.prototype"
     compileSdk = 34

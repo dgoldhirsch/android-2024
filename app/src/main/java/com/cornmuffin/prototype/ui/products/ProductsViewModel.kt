@@ -2,6 +2,7 @@ package com.cornmuffin.prototype.ui.products
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cornmuffin.prototype.Navigator
 import com.cornmuffin.prototype.data.products.ProductsRepository
 import com.cornmuffin.prototype.data.products.ProductsResponse
 import com.cornmuffin.prototype.data.room.Database
@@ -18,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductsViewModel @Inject constructor(
     private val repository: ProductsRepository,
+    private val navigator: Navigator,
 ) : ViewModel() {
 
     private val container = ProductsContainer(viewModelScope)
@@ -25,6 +27,7 @@ class ProductsViewModel @Inject constructor(
     // Action inputs to the state machine, not to be confused with UI user actions.
     sealed interface Action {
         data object Load : Action
+        data class NavigateTo(val navTarget: Navigator.NavTarget) : Action
         data class ProcessLoadResponse(val productsResponse: ProductsResponse) : Action
         data object Refresh : Action
         data class ProcessRefreshResponse(val productsResponse: ProductsResponse) : Action
@@ -72,6 +75,12 @@ class ProductsViewModel @Inject constructor(
                     container.intent {
                         postSideEffect(ProductsSideEffect.Refresh)
                         reduce { this.state.asRefreshing() }
+                    }
+                }
+
+                is Action.NavigateTo -> {
+                    container.intent {
+                        navigator.navigateTo(action.navTarget)
                     }
                 }
                 else -> { }
