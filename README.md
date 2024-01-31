@@ -16,6 +16,7 @@ A sample app demonstrating basic competence in the Android technology stack:
 * Coin
 * Hilt
 * Room
+  - Auto Migrations
 * Retrofit
 * JUnit
 * Mockk
