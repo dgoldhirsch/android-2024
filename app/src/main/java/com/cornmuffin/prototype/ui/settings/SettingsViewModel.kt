@@ -2,6 +2,7 @@ package com.cornmuffin.prototype.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cornmuffin.prototype.Navigator
 import com.cornmuffin.prototype.data.settings.Setting
 import com.cornmuffin.prototype.data.settings.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,12 +18,14 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repository: SettingsRepository,
+    private val navigator: Navigator,
 ) : ViewModel() {
 
     private val container = SettingsContainer(viewModelScope)
 
     // Action inputs to the state machine, not to be confused with UI user actions.
     sealed interface Action {
+        data object GoBack: Action
         data object Load : Action
         data class ProcessLoadSuccess(val settings: ImmutableList<Setting>) : Action
     }
@@ -51,7 +54,14 @@ class SettingsViewModel @Inject constructor(
                 else -> {}
             }
 
-            else -> { } // SUCCESSFUL
+            else -> when (action) { // SUCCESSFUL
+                is Action.GoBack -> {
+                    container.intent {
+                        navigator.navigateTo(Navigator.NavTarget.Back)
+                    }
+                }
+                else -> { }
+            }
         }
     }
 

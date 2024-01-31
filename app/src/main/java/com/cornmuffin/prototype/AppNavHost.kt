@@ -17,7 +17,11 @@ fun AppNavHost(
 ) {
     LaunchedEffect("navigation") {
         navigator.sharedFlow.onEach {
-            navController.navigate(it.label)
+            if (it == Navigator.NavTarget.Back) {
+                navController.popBackStack()
+            } else {
+                navController.navigate(it.label)
+            }
         }.launchIn(this)
     }
 

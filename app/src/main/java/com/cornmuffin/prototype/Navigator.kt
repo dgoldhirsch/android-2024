@@ -15,6 +15,7 @@ class Navigator @Inject constructor() {
     }
 
     enum class NavTarget(val label: String) {
+        Back("back"), // special--not a page, but a directive to pop the back stack
         Products("products"),
         Settings("settings"),
     }
