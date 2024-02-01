@@ -19,11 +19,11 @@ object RoomModule {
         @ApplicationContext context: Context,
     ) = databaseBuilder(
         context = context,
-        Database::class.java,
-        Database.DATABASE_NAME
+        AppDatabase::class.java,
+        AppDatabase.DATABASE_NAME
     ).build()
 
     @Singleton
     @Provides
-    fun provideProductDao(db: Database) = db.getProductDao()
+    fun provideProductDao(db: AppDatabase) = db.getProductDao()
 }

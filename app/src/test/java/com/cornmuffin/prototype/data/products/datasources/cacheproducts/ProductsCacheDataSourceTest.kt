@@ -1,7 +1,7 @@
 package com.cornmuffin.prototype.data.products.datasources.cacheproducts
 
 import com.cornmuffin.prototype.data.products.Product
-import com.cornmuffin.prototype.data.room.Database
+import com.cornmuffin.prototype.data.room.AppDatabase
 import com.cornmuffin.prototype.util.TimeControl
 import io.mockk.Runs
 import io.mockk.every
@@ -19,7 +19,7 @@ class ProductsCacheDataSourceTest {
 
     private val products = persistentListOf<Product>(mockk())
 
-    private val database: Database = mockk {
+    private val appDatabase: AppDatabase = mockk {
         every { products() } returns products
         every { productsUpdatedAt() } returns null
         every { resetProductCache() } just Runs
@@ -30,7 +30,7 @@ class ProductsCacheDataSourceTest {
     }
 
     private val subject = ProductsCacheDataSource(
-        database = database,
+        appDatabase = appDatabase,
         timeControl = timeControl,
     )
 
@@ -39,22 +39,22 @@ class ProductsCacheDataSourceTest {
         val products = subject.products()
 
         assertEquals(persistentListOf(), products)
-        verify { database.resetProductCache() }
+        verify { appDatabase.resetProductCache() }
     }
 
     @Test
     fun `products - given expired updatedAt - resets the cache and returns an empty collection`() {
-        every { database.productsUpdatedAt() } returns TOO_OLD
+        every { appDatabase.productsUpdatedAt() } returns TOO_OLD
 
         val products = subject.products()
 
         assertEquals(persistentListOf(), products)
-        verify { database.resetProductCache() }
+        verify { appDatabase.resetProductCache() }
     }
 
     @Test
     fun `products - given non-expired updatedAt - returns the products`() {
-        every { database.productsUpdatedAt() } returns GOOD
+        every { appDatabase.productsUpdatedAt() } returns GOOD
 
         val products = subject.products()
 
@@ -63,7 +63,7 @@ class ProductsCacheDataSourceTest {
 
     @Test
     fun `products - given a future updatedAt (presumably only for testing) - returns the products`() {
-        every { database.productsUpdatedAt() } returns FUTURE
+        every { appDatabase.productsUpdatedAt() } returns FUTURE
 
         val products = subject.products()
 

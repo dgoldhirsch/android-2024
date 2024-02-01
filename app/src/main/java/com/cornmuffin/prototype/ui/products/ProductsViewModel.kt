@@ -5,9 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.cornmuffin.prototype.Navigator
 import com.cornmuffin.prototype.data.products.ProductsRepository
 import com.cornmuffin.prototype.data.products.ProductsResponse
-import com.cornmuffin.prototype.data.room.Database
+import com.cornmuffin.prototype.data.settings.Settings
+import com.cornmuffin.prototype.data.settings.SettingsRepository
+import com.cornmuffin.prototype.ui.common.CannotGoBack
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
@@ -19,9 +22,11 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductsViewModel @Inject constructor(
     private val repository: ProductsRepository,
+    private val settingsRepository: SettingsRepository,
     private val navigator: Navigator,
-) : ViewModel() {
+) : CannotGoBack, ViewModel() {
 
+    internal var settings: Settings = Settings()
     private val container = ProductsContainer(viewModelScope)
 
     // Action inputs to the state machine, not to be confused with UI user actions.
@@ -42,6 +47,7 @@ class ProductsViewModel @Inject constructor(
                 is Action.Load,
                 is Action.Retry -> {
                     container.intent {
+                        postSideEffect(ProductsSideEffect.GetSettings)
                         postSideEffect(ProductsSideEffect.FetchForLoad)
                         reduce { this.state.asLoading() }
                     }
@@ -143,6 +149,11 @@ class ProductsViewModel @Inject constructor(
                         fetchFromNetwork().collect {
                             reduceViewModel(Action.ProcessLoadResponse(it))
                         }
+                    }
+
+                    is ProductsSideEffect.GetSettings -> viewModelScope.launch {
+                        settingsRepository.initialize()
+                        settingsRepository.settings.collect { settings = it }
                     }
 
                     is ProductsSideEffect.Refresh -> viewModelScope.launch {

@@ -16,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
+import com.cornmuffin.prototype.LocalSettings
 import com.cornmuffin.prototype.Navigator
 import com.cornmuffin.prototype.R
 import com.cornmuffin.prototype.data.products.Product
@@ -45,11 +47,19 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProductsLayout() {
     val productsViewModelState by hiltViewModel<ProductsViewModel>().stateFlow().collectAsState()
-    when (productsViewModelState.state) {
-        ProductsViewModelState.State.ERROR -> Error(productsViewModelState.errorMessage)
-        ProductsViewModelState.State.LOADING -> Loading()
-        ProductsViewModelState.State.REFRESHING -> Refreshing(products = productsViewModelState.products)
-        else -> Products(products = productsViewModelState.products)
+    val viewModel = hiltViewModel<ProductsViewModel>()
+
+    CompositionLocalProvider(LocalSettings provides viewModel.settings) {
+        when (productsViewModelState.state) {
+            ProductsViewModelState.State.ERROR -> Error(productsViewModelState.errorMessage)
+            ProductsViewModelState.State.LOADING -> Loading()
+            ProductsViewModelState.State.REFRESHING -> Refreshing(products = productsViewModelState.products)
+
+            else -> Products(
+                products = productsViewModelState.products
+                // viewModel.settings
+            )
+        }
     }
 }
 
@@ -189,6 +199,7 @@ private fun Product(product: Product) {
         modifier = Modifier.padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+
         product.image?.also {
             SubcomposeAsyncImage(
                 model = it,
@@ -201,6 +212,7 @@ private fun Product(product: Product) {
         Text(
             fontWeight = FontWeight.Bold,
             text = product.title,
+            color = if (LocalSettings.current.enableDebugging) Color.Blue else Color.Black
         )
         Text(product.description)
         Text(

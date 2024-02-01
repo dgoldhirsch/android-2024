@@ -3,12 +3,10 @@ package com.cornmuffin.prototype.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornmuffin.prototype.Navigator
-import com.cornmuffin.prototype.data.settings.Setting
+import com.cornmuffin.prototype.data.settings.Settings
 import com.cornmuffin.prototype.data.settings.SettingsRepository
+import com.cornmuffin.prototype.ui.common.CanGoBack
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
@@ -19,15 +17,15 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val repository: SettingsRepository,
     private val navigator: Navigator,
-) : ViewModel() {
+) : CanGoBack, ViewModel() {
 
     private val container = SettingsContainer(viewModelScope)
 
     // Action inputs to the state machine, not to be confused with UI user actions.
     sealed interface Action {
-        data object GoBack: Action
         data object Load : Action
-        data class ProcessLoadSuccess(val settings: ImmutableList<Setting>) : Action
+        data class ProcessLoadSuccess(val settings: Settings) : Action
+        data class UpdateDisk(val newSettings: Settings) : Action
     }
 
     // Controls the view model based on current Orbit container state and a given action (event).
@@ -36,8 +34,8 @@ class SettingsViewModel @Inject constructor(
             SettingsViewModelState.State.UNINITIALIZED -> when (action) { // Default state when state machine is constructed
                 is Action.Load -> {
                     container.intent {
-                        postSideEffect(SettingsSideEffect.FetchForLoad)
                         reduce { this.state.asLoading() }
+                        postSideEffect(SettingsSideEffect.Load)
                     }
                 }
 
@@ -54,13 +52,15 @@ class SettingsViewModel @Inject constructor(
                 else -> {}
             }
 
-            else -> when (action) { // SUCCESSFUL
-                is Action.GoBack -> {
+            SettingsViewModelState.State.SUCCESSFUL -> when (action) {
+                is Action.UpdateDisk -> {
                     container.intent {
-                        navigator.navigateTo(Navigator.NavTarget.Back)
+                        reduce { this.state.asSuccess(action.newSettings) }
+                        postSideEffect(SettingsSideEffect.WriteSettingsToDisk(action.newSettings))
                     }
                 }
-                else -> { }
+
+                else -> {}
             }
         }
     }
@@ -69,6 +69,12 @@ class SettingsViewModel @Inject constructor(
         listenForSideEffects()
         reduceViewModel(Action.Load)
     }
+
+    override fun goBack() {
+        navigator.navigateTo(Navigator.NavTarget.Back)
+    }
+
+    fun settings(): Settings = container.stateFlow.value.settings ?: Settings()
 
     /**
      * Allow UI and other callers to advance our state based on an action.
@@ -83,16 +89,17 @@ class SettingsViewModel @Inject constructor(
      */
     internal fun stateFlow() = container.stateFlow
 
-    private fun fetchSettings() = repository.settings
-        .flowOn(Dispatchers.IO)
-        // TODO catch errors, emit a SettingsResponse.Error object
-
     private fun listenForSideEffects() {
         viewModelScope.launch {
             container.sideEffectFlow.collect { sideEffect ->
                 when (sideEffect) {
-                    is SettingsSideEffect.FetchForLoad -> viewModelScope.launch {
-                        fetchSettings().collect {
+                    is SettingsSideEffect.WriteSettingsToDisk -> viewModelScope.launch {
+                        repository.replaceSettings(sideEffect.newSettings)
+                    }
+
+                    is SettingsSideEffect.Load -> viewModelScope.launch {
+                        repository.initialize()
+                        repository.settings.collect {
                             reduceViewModel(Action.ProcessLoadSuccess(it))
                         }
                     }

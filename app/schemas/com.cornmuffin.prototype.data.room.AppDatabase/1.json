@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 2,
-    "identityHash": "cd1293d853856641c430d2a6a297cfc5",
+    "version": 1,
+    "identityHash": "8405e13ee6a8748df1b79e6347945ddf",
     "entities": [
       {
         "tableName": "ProductEntity",
@@ -75,8 +75,8 @@
         "foreignKeys": []
       },
       {
-        "tableName": "BinarySettingEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `value` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "tableName": "SettingsEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `enable_debugging` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -85,14 +85,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "name",
-            "columnName": "name",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "value",
-            "columnName": "value",
+            "fieldPath": "enableDebugging",
+            "columnName": "enable_debugging",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -110,7 +104,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cd1293d853856641c430d2a6a297cfc5')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8405e13ee6a8748df1b79e6347945ddf')"
     ]
   }
 }

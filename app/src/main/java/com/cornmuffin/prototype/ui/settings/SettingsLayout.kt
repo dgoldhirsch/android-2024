@@ -6,18 +6,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,11 +22,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornmuffin.prototype.R
-import com.cornmuffin.prototype.data.settings.Setting
+import com.cornmuffin.prototype.data.settings.Settings
+import com.cornmuffin.prototype.ui.common.CommonTopAppBar
 
 @Composable
 fun SettingsLayout() {
     val settingsViewModelState by hiltViewModel<SettingsViewModel>().stateFlow().collectAsState()
+
     when (settingsViewModelState.state) {
         SettingsViewModelState.State.LOADING -> Loading()
         SettingsViewModelState.State.SUCCESSFUL -> Settings(settingsViewModelState.settings)
@@ -66,68 +60,41 @@ fun Loading(text: String = stringResource(R.string.loading)) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Settings(
-    settings: List<Setting>,
-    modifier: Modifier = Modifier,
-) {
+fun Settings(settings: Settings) {
     val viewModel = hiltViewModel<SettingsViewModel>()
 
     Column {
-        TopAppBar(
-            title = {
-                Text("Settings")
-            },
-            navigationIcon = {
-                IconButton(
-                    onClick = { viewModel.reduceViewModel(SettingsViewModel.Action.GoBack) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Back"
-                    )
-                }
-            }
-        )
-
-        LazyColumn(modifier = modifier) {
-            items(settings) {
-                Setting(it)
-                Divider()
-            }
+        CommonTopAppBar {
+            viewModel.goBack()
         }
-    }
-}
 
-@Composable
-@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
-fun SettingsPreview() {
-    Settings(
-        listOf(
-            Setting.BinarySetting(name = "Enable Debugging", value = true),
-            Setting.BinarySetting(name = "Track Analytics", value = false),
-        ),
-    )
-}
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
 
-@Composable
-private fun Setting(setting: Setting) {
-    Column(
-        modifier = Modifier.padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Row {
-            Text(
-                fontWeight = FontWeight.Bold,
-                text = setting.name,
-            )
+            Row {
+                Text(
+                    fontWeight = FontWeight.Bold,
+                    text = "Enable Debugging",
+                )
 
-            Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.weight(1f))
 
-            Text(
-                text = setting.displayableValue
-            )
+                Checkbox(
+                    checked = settings.enableDebugging,
+                    onCheckedChange = { newValue ->
+                        viewModel.reduceViewModel(
+                            SettingsViewModel.Action.UpdateDisk(
+                                settings.copy(
+                                    enableDebugging = newValue
+                                )
+                            )
+                        )
+                    }
+                )
+            }
         }
     }
 }
