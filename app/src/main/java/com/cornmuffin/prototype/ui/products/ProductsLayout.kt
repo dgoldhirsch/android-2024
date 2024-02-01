@@ -46,8 +46,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ProductsLayout() {
-    val productsViewModelState by hiltViewModel<ProductsViewModel>().stateFlow().collectAsState()
     val viewModel = hiltViewModel<ProductsViewModel>()
+    val productsViewModelState by viewModel.stateFlow().collectAsState()
 
     CompositionLocalProvider(LocalSettings provides viewModel.settings) {
         when (productsViewModelState.state) {
@@ -55,10 +55,7 @@ fun ProductsLayout() {
             ProductsViewModelState.State.LOADING -> Loading()
             ProductsViewModelState.State.REFRESHING -> Refreshing(products = productsViewModelState.products)
 
-            else -> Products(
-                products = productsViewModelState.products
-                // viewModel.settings
-            )
+            else -> Products(products = productsViewModelState.products)
         }
     }
 }

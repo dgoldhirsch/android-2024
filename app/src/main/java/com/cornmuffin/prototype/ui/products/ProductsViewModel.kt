@@ -10,7 +10,6 @@ import com.cornmuffin.prototype.data.settings.SettingsRepository
 import com.cornmuffin.prototype.ui.common.CannotGoBack
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
@@ -26,6 +25,10 @@ class ProductsViewModel @Inject constructor(
     private val navigator: Navigator,
 ) : CannotGoBack, ViewModel() {
 
+    // For now we need the up-to-date settings in the layout.
+    // Maybe it would be better to move them from here into the
+    // container state?  Or, better, decouple them entirely from this
+    // view model, because they exist in a singleton repository.
     internal var settings: Settings = Settings()
     private val container = ProductsContainer(viewModelScope)
 
