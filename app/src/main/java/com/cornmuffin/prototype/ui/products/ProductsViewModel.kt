@@ -10,8 +10,6 @@ import com.cornmuffin.prototype.data.settings.SettingsRepository
 import com.cornmuffin.prototype.ui.common.CannotGoBack
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -56,7 +54,8 @@ class ProductsViewModel @Inject constructor(
                         reduce { this.state.asLoading() }
                     }
                 }
-                else -> { }
+
+                else -> {}
             }
 
             ProductsViewModelState.State.LOADING -> when (action) {
@@ -74,10 +73,11 @@ class ProductsViewModel @Inject constructor(
                             }
                         }
 
-                        else -> { }
+                        else -> {}
                     }
                 }
-                else -> { }
+
+                else -> {}
             }
 
             ProductsViewModelState.State.SUCCESSFUL -> when (action) {
@@ -93,7 +93,8 @@ class ProductsViewModel @Inject constructor(
                         navigator.navigateTo(action.navTarget)
                     }
                 }
-                else -> { }
+
+                else -> {}
             }
 
             ProductsViewModelState.State.REFRESHING -> when (action) {
@@ -113,10 +114,11 @@ class ProductsViewModel @Inject constructor(
                             }
                         }
 
-                        else -> { }
+                        else -> {}
                     }
                 }
-                else -> { }
+
+                else -> {}
             }
         }
     }
@@ -139,32 +141,29 @@ class ProductsViewModel @Inject constructor(
      */
     internal fun stateFlow() = container.stateFlow
 
-    private suspend fun fetchFromNetwork() = repository.products
-        .catch {
-            emit(ProductsResponse.Error(it))
+    private suspend fun fetchFromNetwork() = try {
+        withContext(Dispatchers.IO) {
+            repository.getProducts()
         }
+    } catch (e: Exception) {
+        ProductsResponse.Error(e)
+    }
 
     private fun listenForSideEffects() {
         viewModelScope.launch {
             container.sideEffectFlow.collect { productsSideEffect ->
                 when (productsSideEffect) {
-                    is ProductsSideEffect.FetchForLoad -> viewModelScope.launch() {
-                        withContext(Dispatchers.IO) {
-                            fetchFromNetwork().collect {
-                                reduceViewModel(Action.ProcessLoadResponse(it))
-                            }
-                        }
+                    is ProductsSideEffect.FetchForLoad -> viewModelScope.launch(Dispatchers.IO) {
+                        reduceViewModel(Action.ProcessLoadResponse(fetchFromNetwork()))
                     }
 
-                    is ProductsSideEffect.GetSettings -> viewModelScope.launch {
+                    is ProductsSideEffect.GetSettings -> viewModelScope.launch(Dispatchers.IO) {
                         settingsRepository.initialize()
                         settingsRepository.settings.collect { settings = it }
                     }
 
-                    is ProductsSideEffect.Refresh -> viewModelScope.launch {
-                        fetchFromNetwork().collect {
-                            reduceViewModel(Action.ProcessRefreshResponse(it))
-                        }
+                    is ProductsSideEffect.Refresh -> viewModelScope.launch(Dispatchers.IO) {
+                        reduceViewModel(Action.ProcessRefreshResponse(fetchFromNetwork()))
                     }
                 }
             }

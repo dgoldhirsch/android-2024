@@ -9,24 +9,22 @@ import javax.inject.Singleton
 
 @Singleton
 class ProductsRepository @Inject internal constructor(
-    cacheDataSource: ProductsCacheDataSource,
-    networkDataSource: ProductsNetworkDataSource,
+    private val cacheDataSource: ProductsCacheDataSource,
+    private val networkDataSource: ProductsNetworkDataSource,
 ) {
-    val products: Flow<ProductsResponse> = flow {
+    suspend fun getProducts(): ProductsResponse {
         val cachedProducts = cacheDataSource.products()
 
-        emit (
-            if (cachedProducts.isNotEmpty()) {
-                ProductsResponse.Success(data = cachedProducts)
-            } else {
-                val networkProductResponse = networkDataSource.fetchAndParseProducts()
+        return if (cachedProducts.isNotEmpty()) {
+            ProductsResponse.Success(data = cachedProducts)
+        } else {
+            val networkProductResponse = networkDataSource.fetchAndParseProducts()
 
-                if (networkProductResponse is ProductsResponse.Success) {
-                    cacheDataSource.replaceAllProducts(networkProductResponse.data)
-                }
-
-                networkProductResponse
+            if (networkProductResponse is ProductsResponse.Success) {
+                cacheDataSource.replaceAllProducts(networkProductResponse.data)
             }
-        )
+
+            networkProductResponse
+        }
     }
 }
