@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
 import org.orbitmvi.orbit.syntax.simple.reduce
@@ -139,7 +140,6 @@ class ProductsViewModel @Inject constructor(
     internal fun stateFlow() = container.stateFlow
 
     private suspend fun fetchFromNetwork() = repository.products
-        .flowOn(Dispatchers.IO)
         .catch {
             emit(ProductsResponse.Error(it))
         }
@@ -148,9 +148,11 @@ class ProductsViewModel @Inject constructor(
         viewModelScope.launch {
             container.sideEffectFlow.collect { productsSideEffect ->
                 when (productsSideEffect) {
-                    is ProductsSideEffect.FetchForLoad -> viewModelScope.launch {
-                        fetchFromNetwork().collect {
-                            reduceViewModel(Action.ProcessLoadResponse(it))
+                    is ProductsSideEffect.FetchForLoad -> viewModelScope.launch() {
+                        withContext(Dispatchers.IO) {
+                            fetchFromNetwork().collect {
+                                reduceViewModel(Action.ProcessLoadResponse(it))
+                            }
                         }
                     }
 
