@@ -1,7 +1,6 @@
 package com.cornmuffin.prototype
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -36,38 +35,20 @@ fun AppNavHost(
         navController = navController,
         startDestination = Navigator.NavTarget.Products.name
     ) {
+        val tween: FiniteAnimationSpec<Float> = tween(ANIMATION_MILLIS, 0, EASING)
+
         composable(
             route = Navigator.NavTarget.Products.name,
-            enterTransition = { fadeIn() },
-            exitTransition = {
-                fadeOut(
-                    animationSpec = tween(ANIMATION_MILLIS, 0, EASING),
-                )
-            },
-            popEnterTransition = {
-                fadeIn(
-                    animationSpec = tween(ANIMATION_MILLIS, 0, EASING),
-                )
-            },
+            enterTransition = { fadeIn(tween) },
+            exitTransition = { fadeOut(tween) },
+            popEnterTransition = { fadeIn(tween) },
         ) { ProductsLayout() }
 
         composable(
             route = Navigator.NavTarget.Settings.name,
-            enterTransition = {
-                fadeIn(
-                    animationSpec = tween(ANIMATION_MILLIS, 0, EASING),
-                )
-            },
-            exitTransition = {
-                fadeOut(
-                    animationSpec = tween(ANIMATION_MILLIS, 0, EASING),
-                )
-            },
-            popExitTransition = {
-                fadeOut(
-                    animationSpec = tween(ANIMATION_MILLIS, 0, EASING),
-                )
-            }
+            enterTransition = { fadeIn(tween) },
+            exitTransition = { fadeOut(tween) },
+            popExitTransition = { fadeOut(tween) }
         ) { SettingsLayout() }
     }
 }
