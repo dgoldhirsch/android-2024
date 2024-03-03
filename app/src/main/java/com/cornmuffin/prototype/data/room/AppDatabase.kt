@@ -1,10 +1,7 @@
 package com.cornmuffin.prototype.data.room
 
-import androidx.room.AutoMigration
 import androidx.room.Database
-import androidx.room.DeleteTable
 import androidx.room.RoomDatabase
-import androidx.room.migration.AutoMigrationSpec
 import com.cornmuffin.prototype.data.products.Product
 import com.cornmuffin.prototype.data.room.products.ProductDao
 import com.cornmuffin.prototype.data.room.products.ProductEntity
