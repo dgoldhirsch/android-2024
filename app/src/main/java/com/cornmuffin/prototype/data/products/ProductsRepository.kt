@@ -25,4 +25,8 @@ class ProductsRepository @Inject internal constructor(
             networkProductResponse
         }
     }
+
+    fun flushCache() {
+        cacheDataSource.replaceAllProducts(emptyList())
+    }
 }

@@ -141,7 +141,7 @@ class ProductsViewModel @Inject constructor(
      */
     internal fun stateFlow() = container.stateFlow
 
-    private suspend fun fetchFromNetwork() = try {
+    private suspend fun getProducts() = try {
         withContext(Dispatchers.IO) {
             repository.getProducts()
         }
@@ -154,7 +154,7 @@ class ProductsViewModel @Inject constructor(
             container.sideEffectFlow.collect { productsSideEffect ->
                 when (productsSideEffect) {
                     is ProductsSideEffect.FetchForLoad -> viewModelScope.launch(Dispatchers.IO) {
-                        reduceViewModel(Action.ProcessLoadResponse(fetchFromNetwork()))
+                        reduceViewModel(Action.ProcessLoadResponse(getProducts()))
                     }
 
                     is ProductsSideEffect.GetSettings -> viewModelScope.launch(Dispatchers.IO) {
@@ -163,7 +163,8 @@ class ProductsViewModel @Inject constructor(
                     }
 
                     is ProductsSideEffect.Refresh -> viewModelScope.launch(Dispatchers.IO) {
-                        reduceViewModel(Action.ProcessRefreshResponse(fetchFromNetwork()))
+                        repository.flushCache()
+                        reduceViewModel(Action.ProcessRefreshResponse(getProducts()))
                     }
                 }
             }

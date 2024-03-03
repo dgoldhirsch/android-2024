@@ -36,6 +36,6 @@ class ProductsCacheDataSource @Inject constructor(
 
     @VisibleForTesting
     companion object {
-        val CACHE_LIFETIME: Duration = Duration.ofMinutes(1)
+        val CACHE_LIFETIME: Duration = Duration.ofMinutes(15)
     }
 }
