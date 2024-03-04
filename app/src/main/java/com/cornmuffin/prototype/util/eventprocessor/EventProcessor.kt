@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 data class EventProcessor<E : EventQueue.Item>(
-    val control: (EventProcessor<E>, E) -> Unit,
+    val control: EventProcessor<E>.(E) -> Unit,
     private val eventQueue: EventQueue<E> = EventQueue(),
     val scope: CoroutineScope,
 ) {

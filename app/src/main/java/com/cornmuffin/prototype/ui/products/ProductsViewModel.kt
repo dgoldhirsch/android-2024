@@ -3,6 +3,7 @@ package com.cornmuffin.prototype.ui.products
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornmuffin.prototype.Navigator
+import com.cornmuffin.prototype.data.products.Product
 import com.cornmuffin.prototype.data.products.ProductsRepository
 import com.cornmuffin.prototype.data.products.ProductsResponse
 import com.cornmuffin.prototype.data.settings.SettingsRepository
@@ -10,6 +11,7 @@ import com.cornmuffin.prototype.ui.common.CannotGoBack
 import com.cornmuffin.prototype.util.eventprocessor.EventProcessor
 import com.cornmuffin.prototype.util.eventprocessor.EventQueue
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,7 +44,7 @@ class ProductsViewModel @Inject constructor(
 
     private val eventProcessor = EventProcessor(
         scope = viewModelScope,
-        control = { eventProcessor: EventProcessor<Event>, event: Event ->
+        control = { event: Event ->
             if (event is Event.SettingsUninitialized) {
                 viewModelScope.launch { getSettings() }
             } else {
@@ -51,11 +53,8 @@ class ProductsViewModel @Inject constructor(
                     ProductsViewModelState.State.ERROR -> when (event) {
                         is Event.ProductsUninitialized,
                         is Event.RetryProducts -> {
-                            _stateFlow.value = _stateFlow.value.asLoading()
-
-                            viewModelScope.launch {
-                                eventProcessor.enqueue(Event.ReceivedProducts(getProducts()))
-                            }
+                            reduceToLoading()
+                            viewModelScope.launch { enqueue(Event.ReceivedProducts(getProducts())) }
                         }
                         else -> Unit
                     }
@@ -63,13 +62,8 @@ class ProductsViewModel @Inject constructor(
                     ProductsViewModelState.State.LOADING -> when (event) {
                         is Event.ReceivedProducts -> {
                             when (event.productsResponse) {
-                                is ProductsResponse.Error -> {
-                                    _stateFlow.value = _stateFlow.value.asError(event.productsResponse.exception.message ?: "Bummer")
-                                }
-
-                                is ProductsResponse.Success -> {
-                                    _stateFlow.value = _stateFlow.value.asSuccess(event.productsResponse.data)
-                                }
+                                is ProductsResponse.Error -> { reduceToError(event.productsResponse.exception.message ?: "Bummer") }
+                                is ProductsResponse.Success -> { reduceToSuccess(event.productsResponse.data) }
                                 else -> Unit
                             }
                         }
@@ -78,10 +72,9 @@ class ProductsViewModel @Inject constructor(
 
                     ProductsViewModelState.State.SUCCESSFUL -> when (event) {
                         is Event.RefreshProducts -> {
-                            _stateFlow.value = _stateFlow.value.asRefreshing()
+                            reduceToRefreshing()
                             viewModelScope.launch { refresh() }
                         }
-
                         is Event.NavigateTo -> { navigator.navigateTo(event.navTarget) }
                         else -> Unit
                     }
@@ -89,13 +82,8 @@ class ProductsViewModel @Inject constructor(
                     ProductsViewModelState.State.REFRESHING -> when (event) {
                         is Event.ReceivedRefreshedProducts -> {
                             when (event.productsResponse) {
-                                is ProductsResponse.Error -> {
-                                    _stateFlow.value = _stateFlow.value.asError(event.productsResponse.exception.message ?: "Bummer")
-                                }
-
-                                is ProductsResponse.Success -> {
-                                    _stateFlow.value = _stateFlow.value.asSuccess(event.productsResponse.data)
-                                }
+                                is ProductsResponse.Error -> { reduceToError(event.productsResponse.exception.message ?: "Bummer") }
+                                is ProductsResponse.Success -> { reduceToSuccess(event.productsResponse.data) }
                                 else -> Unit
                             }
                         }
@@ -115,6 +103,22 @@ class ProductsViewModel @Inject constructor(
      */
     fun enqueue(vararg events: Event) {
         eventProcessor.enqueue(*events)
+    }
+
+    private fun reduceToError(message: String) {
+        _stateFlow.value = _stateFlow.value.asError(message)
+    }
+
+    private fun reduceToLoading() {
+        _stateFlow.value = _stateFlow.value.asLoading()
+    }
+
+    private fun reduceToRefreshing() {
+        _stateFlow.value = _stateFlow.value.asRefreshing()
+    }
+
+    private fun reduceToSuccess(products: ImmutableList<Product>) {
+        _stateFlow.value = _stateFlow.value.asSuccess(products)
     }
 
     private suspend fun getProducts() = try {
