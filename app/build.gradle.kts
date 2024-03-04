@@ -115,6 +115,10 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     testImplementation("androidx.room:room-testing:$roomVersion")
 
+    // OrbitMVI
+    val orbitVersion = "6.1.0"
+    implementation("org.orbit-mvi:orbit-core:$orbitVersion")
+
     // Mockk
     val mockkVersion = "1.13.9"
     testImplementation("io.mockk:mockk:$mockkVersion")

@@ -21,14 +21,9 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductsViewModel @Inject constructor(
     private val repository: ProductsRepository,
-    private val settingsRepository: SettingsRepository,
+    val settingsRepository: SettingsRepository,
     private val navigator: Navigator,
 ) : CannotGoBack, ViewModel() {
-
-    /**
-     * State of settings
-     */
-    internal var settings: Settings = Settings()
 
     /**
      * Our state
@@ -82,7 +77,6 @@ class ProductsViewModel @Inject constructor(
         data object Refresh : Action
         data class ProcessRefreshResponse(val productsResponse: ProductsResponse) : Action
         data object Retry : Action
-        data object SettingsHaveChanged : Action
     }
 
     // Controls the view model based on current Orbit container state and a given action (event).
@@ -209,7 +203,6 @@ class ProductsViewModel @Inject constructor(
     private suspend fun getSettings() {
         withContext(Dispatchers.IO) {
             settingsRepository.initialize()
-            settingsRepository.settings.collect { settings = it }
         }
     }
 

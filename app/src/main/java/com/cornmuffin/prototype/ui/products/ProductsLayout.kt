@@ -48,8 +48,9 @@ import kotlinx.coroutines.launch
 fun ProductsLayout() {
     val viewModel = hiltViewModel<ProductsViewModel>()
     val productsViewModelState by viewModel.stateFlow().collectAsState()
+    val settings by viewModel.settingsRepository.settings.collectAsState()
 
-    CompositionLocalProvider(LocalSettings provides viewModel.settings) {
+    CompositionLocalProvider(LocalSettings provides settings) {
         when (productsViewModelState.state) {
             ProductsViewModelState.State.ERROR -> Error(productsViewModelState.errorMessage)
             ProductsViewModelState.State.LOADING -> Loading()
@@ -209,7 +210,7 @@ private fun Product(product: Product) {
         Text(
             fontWeight = FontWeight.Bold,
             text = product.title,
-            color = if (LocalSettings.current.enableDebugging) Color.Blue else Color.Black
+            color = if (LocalSettings.current.enableDebugging) Color.Blue else Color.Red
         )
         Text(product.description)
         Text(
