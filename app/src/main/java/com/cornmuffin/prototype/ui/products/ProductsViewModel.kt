@@ -7,8 +7,8 @@ import com.cornmuffin.prototype.data.products.ProductsRepository
 import com.cornmuffin.prototype.data.products.ProductsResponse
 import com.cornmuffin.prototype.data.settings.SettingsRepository
 import com.cornmuffin.prototype.ui.common.CannotGoBack
-import com.cornmuffin.prototype.util.statemachine.StateMachine
-import com.cornmuffin.prototype.util.statemachine.StateMachineEvent
+import com.cornmuffin.prototype.util.eventprocessor.EventProcessor
+import com.cornmuffin.prototype.util.eventprocessor.EventQueue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +27,7 @@ class ProductsViewModel @Inject constructor(
     private val _stateFlow = MutableStateFlow(ProductsViewModelState())
     internal fun stateFlow(): StateFlow<ProductsViewModelState> = _stateFlow.asStateFlow()
 
-    sealed interface Event : StateMachineEvent {
+    sealed interface Event : EventQueue.Item {
         data class NavigateTo(val navTarget: Navigator.NavTarget) : Event
         data object ProductsUninitialized : Event
         data class ReceivedProducts(val productsResponse: ProductsResponse) : Event
@@ -40,13 +40,11 @@ class ProductsViewModel @Inject constructor(
         }
     }
 
-    private val stateMachine = StateMachine(
+    private val eventProcessor = EventProcessor(
         scope = viewModelScope,
-        control = { stateMachine: StateMachine<Event>, event: StateMachineEvent ->
+        control = { eventProcessor: EventProcessor<Event>, event: Event ->
             if (event is Event.SettingsUninitialized) {
-                viewModelScope.launch {
-                    getSettings()
-                }
+                viewModelScope.launch { getSettings() }
             } else {
                 when (stateFlow().value.state) {
                     ProductsViewModelState.State.UNINITIALIZED,
@@ -56,11 +54,10 @@ class ProductsViewModel @Inject constructor(
                             _stateFlow.value = _stateFlow.value.asLoading()
 
                             viewModelScope.launch {
-                                stateMachine.enqueue(Event.ReceivedProducts(getProducts()))
+                                eventProcessor.enqueue(Event.ReceivedProducts(getProducts()))
                             }
                         }
-
-                        else -> {}
+                        else -> Unit
                     }
 
                     ProductsViewModelState.State.LOADING -> when (event) {
@@ -73,28 +70,20 @@ class ProductsViewModel @Inject constructor(
                                 is ProductsResponse.Success -> {
                                     _stateFlow.value = _stateFlow.value.asSuccess(event.productsResponse.data)
                                 }
-
-                                else -> {}
+                                else -> Unit
                             }
                         }
-
-                        else -> {}
+                        else -> Unit
                     }
 
                     ProductsViewModelState.State.SUCCESSFUL -> when (event) {
                         is Event.RefreshProducts -> {
                             _stateFlow.value = _stateFlow.value.asRefreshing()
-
-                            viewModelScope.launch {
-                                refresh()
-                            }
+                            viewModelScope.launch { refresh() }
                         }
 
-                        is Event.NavigateTo -> {
-                            navigator.navigateTo(event.navTarget)
-                        }
-
-                        else -> {}
+                        is Event.NavigateTo -> { navigator.navigateTo(event.navTarget) }
+                        else -> Unit
                     }
 
                     ProductsViewModelState.State.REFRESHING -> when (event) {
@@ -107,12 +96,10 @@ class ProductsViewModel @Inject constructor(
                                 is ProductsResponse.Success -> {
                                     _stateFlow.value = _stateFlow.value.asSuccess(event.productsResponse.data)
                                 }
-
-                                else -> {}
+                                else -> Unit
                             }
                         }
-
-                        else -> {}
+                        else -> Unit
                     }
                 }
             }
@@ -120,14 +107,14 @@ class ProductsViewModel @Inject constructor(
     )
 
     init {
-        stateMachine.enqueue(Event.SettingsUninitialized, Event.ProductsUninitialized)
+        eventProcessor.enqueue(Event.SettingsUninitialized, Event.ProductsUninitialized)
     }
 
     /**
      * Public interface so that Layout can prod our state with an event.
      */
     fun enqueue(vararg events: Event) {
-        stateMachine.enqueue(*events)
+        eventProcessor.enqueue(*events)
     }
 
     private suspend fun getProducts() = try {
@@ -143,7 +130,7 @@ class ProductsViewModel @Inject constructor(
     private suspend fun refresh() {
         withContext(Dispatchers.IO) {
             repository.flushCache()
-            stateMachine.enqueue(Event.ReceivedRefreshedProducts(getProducts()))
+            eventProcessor.enqueue(Event.ReceivedRefreshedProducts(getProducts()))
         }
     }
 }

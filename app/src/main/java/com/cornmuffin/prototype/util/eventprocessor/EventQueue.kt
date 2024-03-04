@@ -1,6 +1,6 @@
-package com.cornmuffin.prototype.util.statemachine
+package com.cornmuffin.prototype.util.eventprocessor
 
-class EventQueue<E : StateMachineEvent> {
+class EventQueue<E : EventQueue.Item> {
     private val queue: ArrayDeque<E> = ArrayDeque()
 
     @Synchronized
@@ -33,4 +33,8 @@ class EventQueue<E : StateMachineEvent> {
 
     @Synchronized
     fun popNext(): E? = queue.removeLastOrNull()
+    
+    interface Item {
+        fun isTopPriority() = false
+    }
 }

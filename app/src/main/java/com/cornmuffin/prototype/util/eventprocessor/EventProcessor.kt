@@ -1,4 +1,4 @@
-package com.cornmuffin.prototype.util.statemachine
+package com.cornmuffin.prototype.util.eventprocessor
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -6,8 +6,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-data class StateMachine<E : StateMachineEvent>(
-    val control: (StateMachine<E>, E) -> Unit,
+data class EventProcessor<E : EventQueue.Item>(
+    val control: (EventProcessor<E>, E) -> Unit,
     private val eventQueue: EventQueue<E> = EventQueue(),
     val scope: CoroutineScope,
 ) {
@@ -35,7 +35,7 @@ data class StateMachine<E : StateMachineEvent>(
         withContext(Dispatchers.Default) {
             var event = eventQueue.popNext()
             while (event != null) {
-                control(this@StateMachine, event)
+                control(this@EventProcessor, event)
                 event = eventQueue.popNext()
                 delay(1) // good karma to yield momentarily
             }
