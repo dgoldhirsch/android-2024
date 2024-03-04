@@ -84,7 +84,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // Added later
-    implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7")
@@ -115,10 +114,6 @@ dependencies {
     ksp("androidx.room:room-compiler:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     testImplementation("androidx.room:room-testing:$roomVersion")
-
-    // OrbitMVI
-    val orbitVersion = "6.1.0"
-    implementation("org.orbit-mvi:orbit-core:$orbitVersion")
 
     // Mockk
     val mockkVersion = "1.13.9"

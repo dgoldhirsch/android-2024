@@ -10,11 +10,12 @@ import com.cornmuffin.prototype.data.settings.SettingsRepository
 import com.cornmuffin.prototype.ui.common.CannotGoBack
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.orbitmvi.orbit.syntax.simple.intent
-import org.orbitmvi.orbit.syntax.simple.postSideEffect
-import org.orbitmvi.orbit.syntax.simple.reduce
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,122 +25,178 @@ class ProductsViewModel @Inject constructor(
     private val navigator: Navigator,
 ) : CannotGoBack, ViewModel() {
 
-    // For now we need the up-to-date settings in the layout.
-    // Maybe it would be better to move them from here into the
-    // container state?  Or, better, decouple them entirely from this
-    // view model, because they exist in a singleton repository.
+    /**
+     * State of settings
+     */
     internal var settings: Settings = Settings()
-    private val container = ProductsContainer(viewModelScope)
+
+    /**
+     * Our state
+     */
+    private val _stateFlow = MutableStateFlow(ProductsViewModelState())
+    internal fun stateFlow(): StateFlow<ProductsViewModelState> = _stateFlow.asStateFlow()
+
+    class EventQueue {
+        private val queue: ArrayDeque<Action> = ArrayDeque()
+
+        @Synchronized
+        fun add(action: Action) {
+            val existingActionIndex = queue.indexOfFirst { it::class == action::class }
+
+            if (existingActionIndex >= 0) {
+                // Replace existing action of this type with newer version
+                queue[existingActionIndex] = action
+            } else if (action is Action.GetSettings) {
+                // Responding to changed settings is always the top priority
+                queue.addFirst(action)
+            } else {
+                // Anything else goes to the back of the queue
+                queue.addLast(action)
+            }
+        }
+
+        fun addAll(vararg actions: Action) {
+            actions.forEach { add(it) }
+        }
+
+        fun debug() {
+            queue.forEachIndexed { index, action ->
+                println(">>>>> [$index] $action")
+            }
+        }
+
+        fun isNotEmpty() = queue.isNotEmpty()
+
+        @Synchronized
+        fun popNext(): Action? = queue.removeLastOrNull()
+    }
+
+    private val eventQueue: EventQueue = EventQueue()
 
     // Action inputs to the state machine, not to be confused with UI user actions.
     sealed interface Action {
+        data object GetSettings : Action
         data object Load : Action
         data class NavigateTo(val navTarget: Navigator.NavTarget) : Action
         data class ProcessLoadResponse(val productsResponse: ProductsResponse) : Action
         data object Refresh : Action
         data class ProcessRefreshResponse(val productsResponse: ProductsResponse) : Action
         data object Retry : Action
+        data object SettingsHaveChanged : Action
     }
 
     // Controls the view model based on current Orbit container state and a given action (event).
     private val stateMachine: (Action) -> Unit = { action ->
-        when (container.stateFlow.value.state) {
-            ProductsViewModelState.State.UNINITIALIZED, // Default state when state machine is constructed
-            ProductsViewModelState.State.ERROR -> when (action) {
-                is Action.Load,
-                is Action.Retry -> {
-                    container.intent {
-                        postSideEffect(ProductsSideEffect.GetSettings)
-                        postSideEffect(ProductsSideEffect.FetchForLoad)
-                        reduce { this.state.asLoading() }
-                    }
-                }
-
-                else -> {}
+        if (action is Action.GetSettings) {
+            viewModelScope.launch {
+                getSettings()
             }
+        } else {
+            when (stateFlow().value.state) {
+                ProductsViewModelState.State.UNINITIALIZED,
+                ProductsViewModelState.State.ERROR -> when (action) {
+                    is Action.Load,
+                    is Action.Retry -> {
+                        _stateFlow.value = _stateFlow.value.asLoading()
 
-            ProductsViewModelState.State.LOADING -> when (action) {
-                is Action.ProcessLoadResponse -> {
-                    when (action.productsResponse) {
-                        is ProductsResponse.Error -> {
-                            container.intent {
-                                reduce { this.state.asError(action.productsResponse.exception.message ?: "Bummer") }
-                            }
+                        viewModelScope.launch {
+                            enqueue(Action.ProcessLoadResponse(getProducts()))
                         }
-
-                        is ProductsResponse.Success -> {
-                            container.intent {
-                                reduce { this.state.asSuccess(action.productsResponse.data) }
-                            }
-                        }
-
-                        else -> {}
                     }
+
+                    else -> {}
                 }
 
-                else -> {}
-            }
+                ProductsViewModelState.State.LOADING -> when (action) {
+                    is Action.ProcessLoadResponse -> {
+                        when (action.productsResponse) {
+                            is ProductsResponse.Error -> {
+                                _stateFlow.value = _stateFlow.value.asError(action.productsResponse.exception.message ?: "Bummer")
+                            }
 
-            ProductsViewModelState.State.SUCCESSFUL -> when (action) {
-                is Action.Refresh -> {
-                    container.intent {
-                        postSideEffect(ProductsSideEffect.Refresh)
-                        reduce { this.state.asRefreshing() }
+                            is ProductsResponse.Success -> {
+                                _stateFlow.value = _stateFlow.value.asSuccess(action.productsResponse.data)
+                            }
+
+                            else -> {}
+                        }
                     }
+
+                    else -> {}
                 }
 
-                is Action.NavigateTo -> {
-                    container.intent {
+                ProductsViewModelState.State.SUCCESSFUL -> when (action) {
+                    is Action.Refresh -> {
+                        _stateFlow.value = _stateFlow.value.asRefreshing()
+
+                        viewModelScope.launch {
+                            refresh()
+                        }
+                    }
+
+                    is Action.NavigateTo -> {
                         navigator.navigateTo(action.navTarget)
                     }
+
+                    else -> {}
                 }
 
-                else -> {}
-            }
-
-            ProductsViewModelState.State.REFRESHING -> when (action) {
-                is Action.ProcessRefreshResponse -> {
-                    when (action.productsResponse) {
-                        is ProductsResponse.Error -> {
-                            container.intent {
-                                reduce {
-                                    this.state.asError(action.productsResponse.exception.message ?: "Bummer")
-                                }
+                ProductsViewModelState.State.REFRESHING -> when (action) {
+                    is Action.ProcessRefreshResponse -> {
+                        when (action.productsResponse) {
+                            is ProductsResponse.Error -> {
+                                _stateFlow.value = _stateFlow.value.asError(action.productsResponse.exception.message ?: "Bummer")
                             }
-                        }
 
-                        is ProductsResponse.Success -> {
-                            container.intent {
-                                reduce { this.state.asSuccess(action.productsResponse.data) }
+                            is ProductsResponse.Success -> {
+                                _stateFlow.value = _stateFlow.value.asSuccess(action.productsResponse.data)
                             }
-                        }
 
-                        else -> {}
+                            else -> {}
+                        }
                     }
-                }
 
-                else -> {}
+                    else -> {}
+                }
             }
         }
     }
 
     init {
-        listenForSideEffects()
-        reduceViewModel(Action.Load)
+        enqueue(Action.GetSettings, Action.Load)
     }
 
     /**
-     * Allow UI and other callers to advance our state based on an action.
+     * Enqueue an action.  If the event queue is empty, we can assume that the
+     * event loop has stopped, and restart it.
      */
-    internal fun reduceViewModel(action: Action) {
-        stateMachine(action)
+    @Synchronized
+    internal fun enqueue(vararg actions: Action) {
+        if (eventQueue.isNotEmpty()) {
+            eventQueue.addAll(*actions)
+        } else {
+            eventQueue.addAll(*actions)
+            prod()
+        }
     }
 
-    /**
-     * Allow UI and other callers to listen to our state flow without having to understand
-     * that our state is managed by an Orbit container.
-     */
-    internal fun stateFlow() = container.stateFlow
+    private fun prod() {
+        viewModelScope.launch {
+            eventLoop()
+        }
+    }
+    private suspend fun eventLoop() {
+        eventQueue.debug()
+
+        withContext(Dispatchers.Default) {
+            var action = eventQueue.popNext()
+            while (action != null) {
+                stateMachine(action)
+                action = eventQueue.popNext()
+                delay(1) // good karma to yield momentarily
+            }
+        }
+    }
 
     private suspend fun getProducts() = try {
         withContext(Dispatchers.IO) {
@@ -149,25 +206,17 @@ class ProductsViewModel @Inject constructor(
         ProductsResponse.Error(e)
     }
 
-    private fun listenForSideEffects() {
-        viewModelScope.launch {
-            container.sideEffectFlow.collect { productsSideEffect ->
-                when (productsSideEffect) {
-                    is ProductsSideEffect.FetchForLoad -> viewModelScope.launch(Dispatchers.IO) {
-                        reduceViewModel(Action.ProcessLoadResponse(getProducts()))
-                    }
+    private suspend fun getSettings() {
+        withContext(Dispatchers.IO) {
+            settingsRepository.initialize()
+            settingsRepository.settings.collect { settings = it }
+        }
+    }
 
-                    is ProductsSideEffect.GetSettings -> viewModelScope.launch(Dispatchers.IO) {
-                        settingsRepository.initialize()
-                        settingsRepository.settings.collect { settings = it }
-                    }
-
-                    is ProductsSideEffect.Refresh -> viewModelScope.launch(Dispatchers.IO) {
-                        repository.flushCache()
-                        reduceViewModel(Action.ProcessRefreshResponse(getProducts()))
-                    }
-                }
-            }
+    private suspend fun refresh() {
+        withContext(Dispatchers.IO) {
+            repository.flushCache()
+            enqueue(Action.ProcessRefreshResponse(getProducts()))
         }
     }
 }
