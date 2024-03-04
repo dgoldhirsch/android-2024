@@ -6,12 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.cornmuffin.prototype.data.settings.Settings
 import com.cornmuffin.prototype.ui.theme.PrototypeTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -26,21 +22,16 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
-            val localSettings = remember { mutableStateOf(Settings()) }
 
-            CompositionLocalProvider(
-                LocalSettings provides localSettings.value
-            ) {
-                PrototypeTheme {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background,
-                    ) {
-                        AppNavHost(
-                            navController = navController,
-                            navigator = navigator
-                        )
-                    }
+            PrototypeTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    AppNavHost(
+                        navController = navController,
+                        navigator = navigator
+                    )
                 }
             }
         }
