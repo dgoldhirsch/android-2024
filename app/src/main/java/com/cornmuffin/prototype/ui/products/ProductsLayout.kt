@@ -79,7 +79,7 @@ fun Error(message: String = stringResource(R.string.no_details)) {
                 text = stringResource(id = R.string.error, message),
             )
 
-            Button(onClick = { viewModel.enqueue(ProductsViewModel.Action.Retry) }) {
+            Button(onClick = { viewModel.enqueue(ProductsViewModel.Event.RetryProducts) }) {
                 Text(
                     textAlign = TextAlign.Center,
                     text = stringResource(id = R.string.retry)
@@ -129,7 +129,7 @@ fun Products(
             onRefresh = {
                 isRefreshing = true
                 coroutineScope.launch {
-                    viewModel.enqueue(ProductsViewModel.Action.Refresh)
+                    viewModel.enqueue(ProductsViewModel.Event.RefreshProducts)
                     isRefreshing = false
                 }
             }
@@ -150,7 +150,7 @@ fun Products(
         }
 
         Button(
-            onClick = { viewModel.enqueue(ProductsViewModel.Action.NavigateTo(Navigator.NavTarget.Settings)) }
+            onClick = { viewModel.enqueue(ProductsViewModel.Event.NavigateTo(Navigator.NavTarget.Settings)) }
         ) {
             Text("Settings...")
         }

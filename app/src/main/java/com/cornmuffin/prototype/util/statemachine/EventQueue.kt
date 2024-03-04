@@ -1,36 +1,36 @@
 package com.cornmuffin.prototype.util.statemachine
 
-class EventQueue {
-    private val queue: ArrayDeque<StateMachineAction> = ArrayDeque()
+class EventQueue<E : StateMachineEvent> {
+    private val queue: ArrayDeque<E> = ArrayDeque()
 
     @Synchronized
-    fun add(action: StateMachineAction) {
-        val existingActionIndex = queue.indexOfFirst { it::class == action::class }
+    fun add(event: E) {
+        val existingIndex = queue.indexOfFirst { it::class == event::class }
 
-        if (existingActionIndex >= 0) {
-            // Replace existing action of this type with newer version
-            queue[existingActionIndex] = action
-        } else if (action.isImmediate()) {
-            // An immediate action will be the next one to pop
-            queue.addFirst(action)
+        if (existingIndex >= 0) {
+            // Replace existing event of this type with newer one
+            queue[existingIndex] = event
+        } else if (event.isTopPriority()) {
+            // A top-priority event will be the next one to be popped
+            queue.addFirst(event)
         } else {
             // Anything else goes to the back of the queue
-            queue.addLast(action)
+            queue.addLast(event)
         }
     }
 
-    fun addAll(vararg actions: StateMachineAction) {
-        actions.forEach { add(it) }
+    fun addAll(vararg events: E) {
+        events.forEach { add(it) }
     }
 
     fun debug() {
-        queue.forEachIndexed { index, action ->
-            println(">>>>> [$index] $action")
+        queue.forEachIndexed { index, event ->
+            println(">>>>> [$index] $event")
         }
     }
 
     fun isNotEmpty() = queue.isNotEmpty()
 
     @Synchronized
-    fun popNext(): StateMachineAction? = queue.removeLastOrNull()
+    fun popNext(): E? = queue.removeLastOrNull()
 }

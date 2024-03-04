@@ -6,21 +6,21 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-data class StateMachine(
-    val control: (StateMachine, StateMachineAction) -> Unit,
-    private val eventQueue: EventQueue = EventQueue(),
+data class StateMachine<E : StateMachineEvent>(
+    val control: (StateMachine<E>, E) -> Unit,
+    private val eventQueue: EventQueue<E> = EventQueue(),
     val scope: CoroutineScope,
 ) {
     /**
-     * Enqueue an action.  If the event queue is empty, we can assume that the
+     * Enqueue an event.  If the event queue is empty, we can assume that the
      * event loop has stopped, and restart it.
      */
     @Synchronized
-    internal fun enqueue(vararg actions: StateMachineAction) {
+    internal fun enqueue(vararg events: E) {
         if (eventQueue.isNotEmpty()) {
-            eventQueue.addAll(*actions)
+            eventQueue.addAll(*events)
         } else {
-            eventQueue.addAll(*actions)
+            eventQueue.addAll(*events)
             prod()
         }
     }
@@ -33,10 +33,10 @@ data class StateMachine(
         eventQueue.debug()
 
         withContext(Dispatchers.Default) {
-            var action = eventQueue.popNext()
-            while (action != null) {
-                control(this@StateMachine, action)
-                action = eventQueue.popNext()
+            var event = eventQueue.popNext()
+            while (event != null) {
+                control(this@StateMachine, event)
+                event = eventQueue.popNext()
                 delay(1) // good karma to yield momentarily
             }
         }
