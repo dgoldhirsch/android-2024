@@ -53,10 +53,10 @@ fun ProductsLayout() {
     CompositionLocalProvider(LocalSettings provides settings) {
         when (productsViewModelState.state) {
             ProductsViewModelState.State.ERROR -> Error(productsViewModelState.errorMessage)
-            ProductsViewModelState.State.LOADING -> Loading()
             ProductsViewModelState.State.REFRESHING -> Refreshing(products = productsViewModelState.products)
-
-            else -> Products(products = productsViewModelState.products)
+            ProductsViewModelState.State.LOADING -> Loading()
+            ProductsViewModelState.State.SUCCESSFUL -> Products(products = productsViewModelState.products)
+            ProductsViewModelState.State.UNINITIALIZED -> Loading()
         }
     }
 }
