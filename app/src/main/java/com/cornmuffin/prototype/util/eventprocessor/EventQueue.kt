@@ -1,10 +1,34 @@
 package com.cornmuffin.prototype.util.eventprocessor
 
-class EventQueue<E : EventQueue.Item> {
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+data class EventQueue<E : EventQueue.Item>(
     private val queue: ArrayDeque<E> = ArrayDeque()
+) {
+    private val _flow = MutableStateFlow<E?>(null)
+    val flow = _flow.asStateFlow()
+
+    suspend fun add(event: E) {
+        addToQueue(event)
+        _flow.emit(queue.removeFirstOrNull())
+    }
 
     @Synchronized
-    fun add(event: E) {
+    @Suppress("Unused")
+    fun debug() {
+        queue.forEachIndexed { index, event ->
+            println("=> [$index] $event")
+        }
+    }
+
+    interface Item {
+        fun isTopPriority() = false
+    }
+
+    private fun addToQueue(event: E) {
         val existingIndex = queue.indexOfFirst { it::class == event::class }
 
         if (existingIndex >= 0) {
@@ -17,24 +41,5 @@ class EventQueue<E : EventQueue.Item> {
             // Anything else goes to the back of the queue
             queue.addLast(event)
         }
-    }
-
-    fun addAll(vararg events: E) {
-        events.forEach { add(it) }
-    }
-
-    fun debug() {
-        queue.forEachIndexed { index, event ->
-            println(">>>>> [$index] $event")
-        }
-    }
-
-    fun isNotEmpty() = queue.isNotEmpty()
-
-    @Synchronized
-    fun popNext(): E? = queue.removeLastOrNull()
-    
-    interface Item {
-        fun isTopPriority() = false
     }
 }
