@@ -59,7 +59,6 @@ class ProductsViewModel @Inject constructor(
                         reduceToLoading()
                         viewModelScope.launch { enqueue(Event.ReceivedProducts(getProducts())) }
                     }
-
                     else -> ignore()
                 }
 
@@ -69,15 +68,12 @@ class ProductsViewModel @Inject constructor(
                             is ProductsResponse.Error -> {
                                 reduceToError(event.productsResponse.exception.message ?: "Bummer")
                             }
-
                             is ProductsResponse.Success -> {
                                 reduceToSuccess(event.productsResponse.data)
                             }
-
                             else -> ignore()
                         }
                     }
-
                     else -> ignore()
                 }
 
@@ -86,11 +82,9 @@ class ProductsViewModel @Inject constructor(
                         reduceToRefreshing()
                         viewModelScope.launch { refresh() }
                     }
-
                     is Event.NavigateTo -> {
                         navigator.navigateTo(event.navTarget)
                     }
-
                     else -> ignore()
                 }
 
@@ -100,15 +94,12 @@ class ProductsViewModel @Inject constructor(
                             is ProductsResponse.Error -> {
                                 reduceToError(event.productsResponse.exception.message ?: "Bummer")
                             }
-
                             is ProductsResponse.Success -> {
                                 reduceToSuccess(event.productsResponse.data)
                             }
-
                             else -> ignore()
                         }
                     }
-
                     else -> ignore()
                 }
             }
