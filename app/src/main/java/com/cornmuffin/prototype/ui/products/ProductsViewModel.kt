@@ -116,6 +116,7 @@ class ProductsViewModel @Inject constructor(
     }
 
     init {
+        println("=> INIT")
         viewModelScope.launch(Dispatchers.Default) {
             eventQueue
                 .flow

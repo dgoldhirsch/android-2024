@@ -130,7 +130,6 @@ fun Products(
                 isRefreshing = true
                 coroutineScope.launch {
                     viewModel.enqueue(ProductsViewModel.Event.RefreshProducts)
-                    isRefreshing = false
                 }
             }
         )
